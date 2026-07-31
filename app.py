@@ -71,7 +71,7 @@ if archivo_imagen is not None:
                     """
 
           response = client.models.generate_content(
-              model="gemini-2.5-flash", contents=[imagen, prompt]
+              model="gemini-1.5-flash", contents=[imagen, prompt]
           )
 
           st.success("¡Análisis completado!")
