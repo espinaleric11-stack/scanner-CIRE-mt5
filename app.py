@@ -27,7 +27,7 @@ st.markdown(
         text-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
     }
     
-    /* Tarjetas contenedoras de secciones */
+    /* Botón futurista */
     div.stButton > button {
         background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
         color: white;
@@ -48,7 +48,7 @@ st.markdown(
     .stTextInput input, .stSelectbox select {
         background-color: #161b22 !important;
         color: #58a6ff !important;
-        border: 1px: solid #30363d !important;
+        border: 1px solid #30363d !important;
         border-radius: 6px !important;
     }
     
@@ -98,13 +98,54 @@ st.markdown(
 )
 st.markdown("<br>", unsafe_allow_html=True)
 
+# Lista completa de activos organizados por categorías
+activos_financieros = [
+    # Metales
+    "XAUUSD (Oro)",
+    "XAGUSD (Plata)",
+    "XPTUSD (Platino)",
+    "XPDUSD (Paladio)",
+    # Forex Majors
+    "EURUSD (Euro / Dólar)",
+    "GBPUSD (Libra / Dólar)",
+    "USDJPY (Dólar / Yen)",
+    "AUDUSD (Dólar Australiano)",
+    "USDCAD (Dólar / Dólar Canadiense)",
+    "NZDUSD (Dólar Neozelandés)",
+    "USDCHF (Dólar / Franco Suizo)",
+    # Forex Minors / Crosses
+    "EURGBP (Euro / Libra)",
+    "EURJPY (Euro / Yen)",
+    "GBPJPY (Libra / Yen)",
+    "AUDJPY (Australiano / Yen)",
+    # Criptomonedas
+    "BTCUSD (Bitcoin)",
+    "ETHUSD (Ethereum)",
+    "SOLUSD (Solana)",
+    "XRPUSD (Ripple)",
+    # Índices Bursátiles
+    "US30 (Dow Jones)",
+    "NAS100 (Nasdaq)",
+    "SPX500 (S&P 500)",
+    "DAX40 (Alemania)",
+    # Materias Primas / Energía
+    "WTI (Petróleo Crudo)",
+    "BRENT (Petróleo Brent)",
+    "NATGAS (Gas Natural)",
+]
+
 # Controles de Activo y Temporalidad
 col1, col2 = st.columns(2)
 with col1:
-  activo = st.text_input("📊 Activo / Par", value="XAUUSD")
+  activo_seleccionado = st.selectbox(
+      "📊 Seleccionar Activo / Par", activos_financieros, index=0
+  )
+  # Extraer únicamente el ticker base (ej: "XAUUSD" de "XAUUSD (Oro)")
+  activo = activo_seleccionado.split(" ")[0]
+
 with col2:
   temporalidad = st.selectbox(
-      "⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1"]
+      "⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1"]
   )
 
 archivo_imagen = st.file_uploader(
