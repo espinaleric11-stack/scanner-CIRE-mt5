@@ -53,8 +53,8 @@ if archivo_imagen is not None:
         with st.spinner("Analizando estructura de mercado..."):
           genai.configure(api_key=api_key)
 
-          # Inicialización limpia y estándar del modelo
-          model = genai.GenerativeModel("gemini-1.5-flash")
+          # Actualizado al modelo vigente compatible con la API estable
+          model = genai.GenerativeModel("gemini-2.5-flash")
 
           prompt = f"""
                     Eres un trader institucional experto en acción del precio y análisis técnico. 
