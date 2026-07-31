@@ -1,5 +1,5 @@
-from google import genai
 from PIL import Image
+import google.generativeai as genai
 import streamlit as st
 
 st.set_page_config(
@@ -51,9 +51,11 @@ if archivo_imagen is not None:
     else:
       try:
         with st.spinner("Analizando estructura de mercado..."):
+          # Configurar la API key con la librería clásica
+          genai.configure(api_key=api_key)
 
-         # Inicializar el cliente asegurando el uso de la versión v1 de la API
-          client = genai.Client(api_key=api_key)
+          # Usar el modelo estándar y compatible
+          model = genai.GenerativeModel("gemini-1.5-flash")
 
           prompt = f"""
                     Eres un trader institucional experto en acción del precio y análisis técnico. 
@@ -71,10 +73,8 @@ if archivo_imagen is not None:
                     5. **Gestión de Riesgo:** Breve advertencia o confirmación a esperar.
                     """
 
-          # Cambiamos la llamada para especificar el modelo de forma limpia
-          response = client.models.generate_content(
-              model="gemini-1.5-flash", contents=[imagen, prompt]
-          )
+          # Generar contenido enviando la imagen y el texto
+          response = model.generate_content([imagen, prompt])
 
           st.success("¡Análisis completado!")
           st.markdown("### 📊 Reporte de Trading")
