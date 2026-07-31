@@ -53,8 +53,11 @@ if archivo_imagen is not None:
         with st.spinner("Analizando estructura de mercado..."):
           genai.configure(api_key=api_key)
 
-          # Usar el sufijo -latest para evitar el error de ruta en v1beta
-          model = genai.GenerativeModel("gemini-1.5-flash-latest")
+          # Usar el modelo base estándar compatible con la versión estable
+          model = genai.GenerativeModel(
+              model_name="models/gemini-1.5-flash",
+              transport="rest",
+          )
 
           prompt = f"""
                     Eres un trader institucional experto en acción del precio y análisis técnico. 
