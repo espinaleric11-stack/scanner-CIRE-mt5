@@ -4,54 +4,115 @@ from PIL import Image
 import requests
 import streamlit as st
 
+# Configuración de la página
 st.set_page_config(
-    page_title="Escáner de Gráficos MT5 - OpenRouter",
-    page_icon="📈",
-    layout="centered",
+    page_title="MT5 Neural Scanner", page_icon="⚡", layout="centered"
 )
 
-st.title("📈 Escáner de Gráficos MT5 - OpenRouter Auto")
-st.write(
-    "Sube tu captura de MetaTrader 5 para recibir un análisis técnico"
-    " institucional automatizado."
+# Estilos CSS Futuristas / Cyberpunk
+st.markdown(
+    """
+    <style>
+    /* Fondo general y tipografía */
+    .stApp {
+        background: radial-gradient(circle at 50% 10%, #0d1117 0%, #010409 100%);
+        color: #c9d1d9;
+    }
+    
+    /* Títulos futuristas */
+    h1, h2, h3 {
+        font-family: 'Inter', sans-serif;
+        letter-spacing: -0.5px;
+        color: #58a6ff;
+        text-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
+    }
+    
+    /* Tarjetas contenedoras de secciones */
+    div.stButton > button {
+        background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+        color: white;
+        border: 1px solid #3fb950;
+        border-radius: 8px;
+        font-weight: 600;
+        width: 100%;
+        box-shadow: 0 0 15px rgba(46, 160, 67, 0.4);
+        transition: all 0.3s ease;
+    }
+    div.stButton > button:hover {
+        background: linear-gradient(135deg, #2ea043 0%, #3fb950 100%);
+        box-shadow: 0 0 25px rgba(63, 185, 80, 0.8);
+        transform: translateY(-2px);
+    }
+    
+    /* Cajas de texto y selectores */
+    .stTextInput input, .stSelectbox select {
+        background-color: #161b22 !important;
+        color: #58a6ff !important;
+        border: 1px: solid #30363d !important;
+        border-radius: 6px !important;
+    }
+    
+    /* Tarjeta de reporte */
+    .report-container {
+        background: rgba(22, 27, 34, 0.7);
+        border: 1px solid #30363d;
+        border-left: 4px solid #58a6ff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
-# Intentar cargar la API Key automáticamente desde st.secrets; si no existe, pedirla en pantalla
+# Encabezado visual
+st.markdown(
+    "<h1 style='text-align: center;'>⚡ MT5 NEURAL SCANNER ⚡</h1>",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    "<p style='text-align: center; color: #8b949e;'>Sistema autónomo"
+    " institucional de análisis de price action asistido por IA</p>",
+    unsafe_allow_html=True,
+)
+st.divider()
+
+# Carga automática de la API Key desde los secrets de Streamlit o campo manual
 api_key = st.secrets.get("OPENROUTER_API_KEY", "")
 
 if not api_key:
   api_key = st.text_input(
-      "Introduce tu API Key de OpenRouter:",
+      "🔑 Introduce tu API Key de OpenRouter:",
       type="password",
-      help=(
-          "Empieza por sk-or-v1-... También puedes guardarla en st.secrets para"
-          " mayor comodidad."
-      ),
+      help="Clave secreta segura.",
   )
 
-# Fijar endpoint y modelo exclusivo de OpenRouter de forma automática
+# Endpoint y modelo fijo en OpenRouter Auto
 api_url = "https://openrouter.ai/api/v1/chat/completions"
 modelo_sugerido = "openrouter/auto"
 
-st.info("🤖 Usando modelo inteligente de enrutamiento: **openrouter/auto**")
+st.markdown(
+    "🟢 **Núcleo Activo:** `openrouter/auto` (Enrutamiento inteligente de"
+    " visión)"
+)
+st.markdown("<br>", unsafe_allow_html=True)
 
-st.divider()
-
+# Controles de Activo y Temporalidad
 col1, col2 = st.columns(2)
 with col1:
-  activo = st.text_input("Activo", value="XAUUSD")
+  activo = st.text_input("📊 Activo / Par", value="XAUUSD")
 with col2:
   temporalidad = st.selectbox(
-      "Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1"]
+      "⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1"]
   )
 
 archivo_imagen = st.file_uploader(
-    "Sube la captura del gráfico (PNG, JPG, JPEG)",
+    "📁 Sube la captura de pantalla de tu gráfico (PNG, JPG)",
     type=["png", "jpg", "jpeg"],
 )
 
 
-# Función auxiliar para convertir la imagen a Base64
 def imagen_a_base64(img):
   buffered = BytesIO()
   img.save(buffered, format="PNG")
@@ -62,20 +123,19 @@ if archivo_imagen is not None:
   imagen = Image.open(archivo_imagen)
   st.image(
       imagen,
-      caption=f"Gráfico de {activo} ({temporalidad})",
+      caption=f"Monitoreando: {activo} [{temporalidad}]",
       use_container_width=True,
   )
 
-  if st.button("🚀 Analizar con OpenRouter"):
+  st.markdown("<br>", unsafe_allow_html=True)
+
+  if st.button("🚀 EJECUTAR ESCANEO NEURONAL"):
     if not api_key or len(api_key) < 10:
-      st.error(
-          "⚠️ Por favor, introduce una API Key válida de OpenRouter para"
-          " procesar la petición."
-      )
+      st.error("⚠️ Se requiere una clave de acceso válida.")
     else:
       try:
         with st.spinner(
-            "Enviando gráfico y conectando con OpenRouter Auto..."
+            "🧠 Analizando geometría de mercado, liquidez y patrones..."
         ):
           imagen_base64 = imagen_a_base64(imagen)
 
@@ -95,12 +155,11 @@ if archivo_imagen is not None:
                     5. **Gestión de Riesgo:** Breve advertencia o confirmación a esperar.
                     """
 
-          # Headers requeridos y recomendados por OpenRouter
           headers = {
               "Authorization": f"Bearer {api_key}",
               "Content-Type": "application/json",
               "HTTP-Referer": "https://streamlit.io",
-              "X-Title": "Scanner MT5 OpenRouter",
+              "X-Title": "MT5 Neural Scanner",
           }
 
           payload = {
@@ -130,14 +189,19 @@ if archivo_imagen is not None:
                 "content"
             ]
 
-            st.success("¡Análisis completado con éxito!")
-            st.markdown("### 📊 Reporte de Trading")
-            st.markdown(texto_respuesta)
+            st.success("✨ ¡Análisis completado con éxito!")
+            st.markdown("### 📊 Reporte Táctico Institucional")
+
+            # Contenedor con diseño futurista para el reporte
+            st.markdown(
+                f"<div class='report-container'>{texto_respuesta}</div>",
+                unsafe_allow_html=True,
+            )
           else:
             st.error(
-                f"Error en la API ({response.status_code}):"
+                f"❌ Error en la conexión de red ({response.status_code}):"
                 f" {response.text}"
             )
 
       except Exception as e:
-        st.error(f"Ocurrió un error al procesar la solicitud: {e}")
+        st.error(f"❌ Error crítico en el proceso: {e}")
