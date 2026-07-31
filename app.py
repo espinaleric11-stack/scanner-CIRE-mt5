@@ -51,11 +51,10 @@ if archivo_imagen is not None:
     else:
       try:
         with st.spinner("Analizando estructura de mercado..."):
-          # Configurar la API key con la librería clásica
           genai.configure(api_key=api_key)
 
-          # Usar el modelo estándar y compatible
-          model = genai.GenerativeModel("gemini-1.5-flash")
+          # Usar el sufijo -latest para evitar el error de ruta en v1beta
+          model = genai.GenerativeModel("gemini-1.5-flash-latest")
 
           prompt = f"""
                     Eres un trader institucional experto en acción del precio y análisis técnico. 
@@ -73,7 +72,6 @@ if archivo_imagen is not None:
                     5. **Gestión de Riesgo:** Breve advertencia o confirmación a esperar.
                     """
 
-          # Generar contenido enviando la imagen y el texto
           response = model.generate_content([imagen, prompt])
 
           st.success("¡Análisis completado!")
