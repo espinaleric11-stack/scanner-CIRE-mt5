@@ -38,24 +38,28 @@ if archivo_imagen is not None:
       use_container_width=True,
   )
 
+ # Botón para iniciar el análisis
   if st.button("🚀 Analizar Gráfico y Dar Sugerencia"):
-    if not api_key or not api_key.startswith("AIza"):
+    # Verificamos que exista algo escrito, pero quitamos la regla estricta de "AIza"
+    if not api_key or len(api_key) < 20:
       st.error(
-          "⚠️ Por favor, introduce una API Key válida (las de Google Gemini"
-          " siempre empiezan por 'AIza')."
+          "⚠️ Por favor, introduce una API Key válida de Google Gemini (asegúrate"
+          " de copiarla completa sin espacios)."
       )
     else:
       try:
         with st.spinner("Analizando estructura de mercado..."):
+          # Inicializar el cliente con la clave proporcionada
           client = genai.Client(api_key=api_key)
 
+          # Definir el prompt (las instrucciones para la IA)
           prompt = f"""
                     Eres un trader institucional experto en acción del precio y análisis técnico. 
                     Analiza la siguiente captura de pantalla de un gráfico de MetaTrader 5 correspondiente al activo {activo} en temporalidad {temporalidad}.
 
                     Proporciona un análisis estructurado exactamente con los siguientes puntos:
                     1. **Tendencia Actual:** (Alcista, Bajista o Rango).
-                    2. **Zonas Clave:** Identifica soportes y resistencias relevantes visibles en el gráfico.
+                    2. **Zonas Clave:** Identifica visualmente soportes y resistencias relevantes visibles en el gráfico.
                     3. **Patrones / Indicadores:** Menciona si observas patrones de velas o estructura de mercado.
                     4. **Sugerencia de Entrada (Setup):** 
                        - **Dirección:** (COMPRA / VENTA / ESPERAR)
@@ -65,10 +69,12 @@ if archivo_imagen is not None:
                     5. **Gestión de Riesgo:** Breve advertencia o confirmación a esperar.
                     """
 
+          # Llamada al modelo (gemini-2.5-flash es el más rápido y capaz)
           response = client.models.generate_content(
               model="gemini-2.5-flash", contents=[imagen, prompt]
           )
 
+          # Mostrar resultados
           st.success("¡Análisis completado!")
           st.markdown("### 📊 Reporte de Trading")
           st.markdown(response.text)
