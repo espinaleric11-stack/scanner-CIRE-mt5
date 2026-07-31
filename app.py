@@ -5,52 +5,35 @@ import requests
 import streamlit as st
 
 st.set_page_config(
-    page_title="Escáner Universal de Gráficos con IA",
+    page_title="Escáner de Gráficos MT5 - OpenRouter",
     page_icon="📈",
     layout="centered",
 )
 
-st.title("📈 Escáner de Gráficos MT5 - IA Universal")
+st.title("📈 Escáner de Gráficos MT5 - OpenRouter Auto")
 st.write(
-    "Sube tu gráfico y usa la API Key de cualquier proveedor compatible (OpenAI,"
-    " Groq, OpenRouter, DeepSeek, etc.)."
+    "Sube tu captura de MetaTrader 5 para recibir un análisis técnico"
+    " institucional automatizado."
 )
 
-# Configuración de credenciales de forma dinámica
-col_k1, col_k2 = st.columns([2, 1])
-with col_k1:
+# Intentar cargar la API Key automáticamente desde st.secrets; si no existe, pedirla en pantalla
+api_key = st.secrets.get("OPENROUTER_API_KEY", "")
+
+if not api_key:
   api_key = st.text_input(
-      "Introduce tu API Key:",
+      "Introduce tu API Key de OpenRouter:",
       type="password",
-      help="Clave secreta de tu proveedor de IA.",
-  )
-with col_k2:
-  proveedor = st.selectbox(
-      "Proveedor / Endpoint",
-      ["OpenAI", "OpenRouter", "Groq (Llama Vision)", "Personalizado"],
+      help=(
+          "Empieza por sk-or-v1-... También puedes guardarla en st.secrets para"
+          " mayor comodidad."
+      ),
   )
 
-# Definir endpoint y modelo por defecto según el proveedor seleccionado
-if proveedor == "OpenAI":
-  api_url = "https://api.openai.com/v1/chat/completions"
-  modelo_sugerido = "gpt-4o-mini"
-elif proveedor == "OpenRouter":
-  api_url = "https://openrouter.ai/api/v1/chat/completions"
-  modelo_sugerido = "meta-llama/llama-3.2-11b-vision-instruct:free"
-elif proveedor == "Groq (Llama Vision)":
-  api_url = "https://api.groq.com/openai/v1/chat/completions"
-  modelo_sugerido = "meta-llama/llama-3.2-11b-vision-instruct"
-else:
-  api_url = st.text_input(
-      "URL de la API (Endpoint Endpoint Custom)",
-      value="https://api.openai.com/v1/chat/completions",
-  )
-  modelo_sugerido = st.text_input("Nombre exacto del Modelo", value="gpt-4o")
+# Fijar endpoint y modelo exclusivo de OpenRouter de forma automática
+api_url = "https://openrouter.ai/api/v1/chat/completions"
+modelo_sugerido = "openrouter/auto"
 
-if proveedor != "Personalizado":
-  modelo_sugerido = st.text_input(
-      "Modelo a utilizar:", value=modelo_sugerido
-  )
+st.info("🤖 Usando modelo inteligente de enrutamiento: **openrouter/auto**")
 
 st.divider()
 
@@ -68,7 +51,7 @@ archivo_imagen = st.file_uploader(
 )
 
 
-# Función auxiliar para convertir la imagen a Base64 (compatible con APIs REST)
+# Función auxiliar para convertir la imagen a Base64
 def imagen_a_base64(img):
   buffered = BytesIO()
   img.save(buffered, format="PNG")
@@ -83,18 +66,17 @@ if archivo_imagen is not None:
       use_container_width=True,
   )
 
-  if st.button("🚀 Analizar con IA Universal"):
+  if st.button("🚀 Analizar con OpenRouter"):
     if not api_key or len(api_key) < 10:
       st.error(
-          "⚠️ Por favor, introduce una API Key válida para procesar la"
-          " petición."
+          "⚠️ Por favor, introduce una API Key válida de OpenRouter para"
+          " procesar la petición."
       )
     else:
       try:
         with st.spinner(
-            "Enviando gráfico y conectando con el proveedor de IA..."
+            "Enviando gráfico y conectando con OpenRouter Auto..."
         ):
-          # Convertir imagen a base64 para envío HTTP estándar
           imagen_base64 = imagen_a_base64(imagen)
 
           prompt = f"""
@@ -113,10 +95,12 @@ if archivo_imagen is not None:
                     5. **Gestión de Riesgo:** Breve advertencia o confirmación a esperar.
                     """
 
-          # Estructura de payload estándar compatible con OpenAI, Groq, OpenRouter, etc.
+          # Headers requeridos y recomendados por OpenRouter
           headers = {
               "Authorization": f"Bearer {api_key}",
               "Content-Type": "application/json",
+              "HTTP-Referer": "https://streamlit.io",
+              "X-Title": "Scanner MT5 OpenRouter",
           }
 
           payload = {
@@ -133,12 +117,11 @@ if archivo_imagen is not None:
                       },
                   ],
               }],
-              "max_tokens": 4048,  # <--- Aumentado para que no se corte
+              "max_tokens": 2048,
           }
 
-          # Petición HTTP POST universal
           response = requests.post(
-              api_url, headers=headers, json=payload, timeout=30
+              api_url, headers=headers, json=payload, timeout=45
           )
 
           if response.status_code == 200:
