@@ -133,7 +133,7 @@ if archivo_imagen is not None:
                       },
                   ],
               }],
-              "max_tokens": 1000,
+              "max_tokens": 4048,  # <--- Aumentado para que no se corte
           }
 
           # Petición HTTP POST universal
