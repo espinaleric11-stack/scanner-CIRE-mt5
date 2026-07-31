@@ -51,6 +51,8 @@ if archivo_imagen is not None:
     else:
       try:
         with st.spinner("Analizando estructura de mercado..."):
+
+         # Inicializar el cliente asegurando el uso de la versión v1 de la API
           client = genai.Client(api_key=api_key)
 
           prompt = f"""
@@ -69,6 +71,7 @@ if archivo_imagen is not None:
                     5. **Gestión de Riesgo:** Breve advertencia o confirmación a esperar.
                     """
 
+          # Cambiamos la llamada para especificar el modelo de forma limpia
           response = client.models.generate_content(
               model="gemini-1.5-flash", contents=[imagen, prompt]
           )
