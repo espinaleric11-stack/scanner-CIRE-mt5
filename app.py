@@ -7,13 +7,17 @@ st.set_page_config(
 )
 
 st.title("📈 Escáner de Gráficos MT5 con IA")
+st.write(
+    "Sube una captura de pantalla de tu gráfico de MetaTrader 5 para recibir un"
+    " análisis técnico y una sugerencia de entrada."
+)
 
-# Campo directo en pantalla para evitar errores de secretos
 api_key = st.text_input(
     "Introduce tu API Key de Google Gemini:",
     type="password",
     help=(
-        "Obtén tu clave gratis en aistudio.google.com (empieza por AIza...)"
+        "Obtén tu clave gratis en aistudio.google.com (empieza por AQ... o"
+        " AIza...)"
     ),
 )
 
@@ -38,21 +42,17 @@ if archivo_imagen is not None:
       use_container_width=True,
   )
 
- # Botón para iniciar el análisis
   if st.button("🚀 Analizar Gráfico y Dar Sugerencia"):
-    # Verificamos que exista algo escrito, pero quitamos la regla estricta de "AIza"
     if not api_key or len(api_key) < 20:
       st.error(
           "⚠️ Por favor, introduce una API Key válida de Google Gemini (asegúrate"
-          " de copiarla completa sin espacios)."
+          " de copiarla completa)."
       )
     else:
       try:
         with st.spinner("Analizando estructura de mercado..."):
-          # Inicializar el cliente con la clave proporcionada
           client = genai.Client(api_key=api_key)
 
-          # Definir el prompt (las instrucciones para la IA)
           prompt = f"""
                     Eres un trader institucional experto en acción del precio y análisis técnico. 
                     Analiza la siguiente captura de pantalla de un gráfico de MetaTrader 5 correspondiente al activo {activo} en temporalidad {temporalidad}.
@@ -69,12 +69,10 @@ if archivo_imagen is not None:
                     5. **Gestión de Riesgo:** Breve advertencia o confirmación a esperar.
                     """
 
-          # Llamada al modelo (gemini-2.5-flash es el más rápido y capaz)
-response = client.models.generate_content(
-    model="gemini-1.5-flash", contents=[imagen, prompt] # Cambia el modelo aquí
-))
+          response = client.models.generate_content(
+              model="gemini-1.5-flash", contents=[imagen, prompt]
+          )
 
-          # Mostrar resultados
           st.success("¡Análisis completado!")
           st.markdown("### 📊 Reporte de Trading")
           st.markdown(response.text)
