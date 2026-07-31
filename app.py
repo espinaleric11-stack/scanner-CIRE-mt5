@@ -7,11 +7,8 @@ st.set_page_config(
 )
 
 st.title("📈 Escáner de Gráficos MT5 con IA")
-st.write(
-    "Sube una captura de pantalla de tu gráfico de MetaTrader 5 para recibir un"
-    " análisis técnico y una sugerencia de entrada."
-)
 
+# Campo directo en pantalla para evitar errores de secretos
 api_key = st.text_input(
     "Introduce tu API Key de Google Gemini:",
     type="password",
