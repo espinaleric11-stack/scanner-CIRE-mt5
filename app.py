@@ -36,7 +36,7 @@ if proveedor == "OpenAI":
   modelo_sugerido = "gpt-4o-mini"
 elif proveedor == "OpenRouter":
   api_url = "https://openrouter.ai/api/v1/chat/completions"
-  modelo_sugerido = "google/gemini-2.0-flash-exp:free"
+  modelo_sugerido = "meta-llama/llama-3.2-11b-vision-instruct:free"
 elif proveedor == "Groq (Llama Vision)":
   api_url = "https://api.groq.com/openai/v1/chat/completions"
   modelo_sugerido = "meta-llama/llama-3.2-11b-vision-instruct"
