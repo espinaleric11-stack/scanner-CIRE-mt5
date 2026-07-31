@@ -70,9 +70,9 @@ if archivo_imagen is not None:
                     """
 
           # Llamada al modelo (gemini-2.5-flash es el más rápido y capaz)
-         response = client.models.generate_content(
+response = client.models.generate_content(
     model="gemini-1.5-flash", contents=[imagen, prompt] # Cambia el modelo aquí
-)
+))
 
           # Mostrar resultados
           st.success("¡Análisis completado!")
