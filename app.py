@@ -70,8 +70,8 @@ if archivo_imagen is not None:
                     5. **Gestión de Riesgo:** Una breve advertencia sobre el riesgo o confirmación a esperar.
                     """
 
-          response = client.models.generate_content(
-              model="gemini-1.5-flash", contents=[imagen, prompt]
+         response = client.models.generate_content(
+              model="gemini-2.5-flash", contents=[imagen, prompt]
           )
 
           st.success("¡Análisis completado!")
