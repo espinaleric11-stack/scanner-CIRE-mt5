@@ -1,5 +1,4 @@
 import base64
-import re
 from io import BytesIO
 from PIL import Image
 import requests
@@ -155,22 +154,11 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- PANEL LATERAL: CONFIGURACIÓN Y HISTORIAL ---
+# --- PANEL LATERAL: HISTORIAL DE ESCANEOS (SELECTOR DE IA OCULTO) ---
 with st.sidebar:
-    st.markdown("### ⚙️ Panel de Control IA")
-    modelo_seleccionado = st.selectbox(
-        "🧠 Motor de IA Vision",
-        options=[
-            "openrouter/auto",
-            "anthropic/claude-3.5-sonnet",
-            "openai/gpt-4o",
-            "google/gemini-1.5-pro-latest"
-        ],
-        index=0,
-        help="Selecciona el modelo inteligente encargado de procesar la geometría del gráfico."
-    )
+    # Modelo predefinido de forma automática en segundo plano (oculto de la interfaz)
+    modelo_seleccionado = "openrouter/auto"
     
-    st.divider()
     st.markdown("### 🕒 Historial de Escaneos")
     if not st.session_state.historial_scans:
         st.info("No hay análisis previos en esta sesión.")
@@ -227,7 +215,7 @@ simbolos_mt5 = [
 # Controles de Activo y Temporalidad
 col1, col2 = st.columns(2)
 with col1:
-    activo_seleccionado = st.selectbox("📊 Símbolo / Activo MT5", simbolos_simulados := simbolos_mt5, index=0)
+    activo_seleccionado = st.selectbox("📊 Símbolo / Activo MT5", simbolos_mt5, index=0)
     activo = activo_seleccionado.split(" ")[0]
 
 with col2:
@@ -348,9 +336,8 @@ if "resultado_activo" in st.session_state:
         # Cálculo de dinero a arriesgar
         dinero_riesgo = capital_cuenta * (porcentaje_riesgo / 100.0)
         
-        # Estimación de lotaje estándar (Asumiendo 1 lote estándar = $10 por pip para Forex mayor, ajustable por activo)
-        # Lote = Dinero a arriesgar / (Distancia en pips * Valor del pip por lote estándar)
-        valor_pip_estandar = 10.0 # Valor general para pares mayores con 1 lote estándar
+        # Estimación de lotaje estándar (Asumiendo 1 lote estándar = $10 por pip para Forex mayor)
+        valor_pip_estandar = 10.0 
         lote_sugerido = dinero_riesgo / (distancia_sl_pips * valor_pip_estandar)
 
         st.divider()
