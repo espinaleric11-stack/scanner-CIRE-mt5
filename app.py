@@ -1,4 +1,5 @@
 import base64
+import re
 from io import BytesIO
 from PIL import Image
 import requests
@@ -108,11 +109,11 @@ st.markdown(
     .btn-accion-gigante {{
         text-align: center;
         font-family: 'Courier New', Courier, monospace;
-        font-size: 32px;
+        font-size: 28px;
         font-weight: 900;
         padding: 18px;
         border-radius: 12px;
-        letter-spacing: 3px;
+        letter-spacing: 2px;
         margin-bottom: 20px;
         box-shadow: 0 0 30px rgba(0,0,0,0.6);
         text-transform: uppercase;
@@ -156,7 +157,6 @@ st.markdown(
 
 # --- PANEL LATERAL: HISTORIAL DE ESCANEOS (SELECTOR DE IA OCULTO) ---
 with st.sidebar:
-    # Modelo predefinido de forma automática en segundo plano (oculto de la interfaz)
     modelo_seleccionado = "openrouter/auto"
     
     st.markdown("### 🕒 Historial de Escaneos")
@@ -245,6 +245,7 @@ if archivo_imagen is not None:
                 ESTRUCTURA OBLIGATORIA DE RESPUESTA (DEBE SEGUIR ESTE ORDEN EXACTO):
                 1. **Sugerencia de Entrada (Setup Táctico):** (Debe ser LO PRIMERO que aparezca en el texto de respuesta).
                    - **Dirección:** (COMPRA / VENTA / ESPERAR) -> Usa exactamente una de estas palabras clave en mayúsculas.
+                   - **Porcentaje de Aceptación / Probabilidad:** (Ej: 85% o el nivel de confianza técnico estimado).
                    - **Precio de Entrada / Zona:** (Nivel aproximado)
                    - **Stop Loss (SL):** (Nivel recomendado)
                    - **Take Profit (TP):** (Nivel objetivo)
@@ -303,19 +304,23 @@ if archivo_imagen is not None:
 if "resultado_activo" in st.session_state:
     texto_res = st.session_state["resultado_activo"]
     
+    # Extracción por expresión regular del porcentaje generado por la IA (ej: "85%")
+    match_porcentaje = re.search(r'(\d{1,3}\s*%)', texto_res)
+    porcentaje_str = match_porcentaje.group(1) if match_porcentaje else "N/D"
+
     # Detección inteligente de la orden operativa para el botón gigante
     texto_upper = texto_res.upper()
     if "COMPRA" in texto_upper or "BUY" in texto_upper:
-        badge_html = '<div class="btn-accion-gigante badge-compra">🟢 SEÑAL DE COMPRA (BUY)</div>'
+        badge_html = f'<div class="btn-accion-gigante badge-compra">🟢 SEÑAL DE COMPRA (BUY) | CONFIANZA: {porcentaje_str}</div>'
     elif "VENTA" in texto_upper or "SELL" in texto_upper:
-        badge_html = '<div class="btn-accion-gigante badge-venta">🔴 SEÑAL DE VENTA (SELL)</div>'
+        badge_html = f'<div class="btn-accion-gigante badge-venta">🔴 SEÑAL DE VENTA (SELL) | CONFIANZA: {porcentaje_str}</div>'
     else:
-        badge_html = '<div class="btn-accion-gigante badge-esperar">🟡 MANTENER / ESPERAR (WAIT)</div>'
+        badge_html = f'<div class="btn-accion-gigante badge-esperar">🟡 MANTENER / ESPERAR (WAIT) | CONFIANZA: {porcentaje_str}</div>'
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🛰️ SETUP TÁCTICO DE ALTA PRIORIDAD", unsafe_allow_html=True)
     
-    # Renderizar el botón gigante arriba del reporte
+    # Renderizar el botón gigante con el porcentaje incluido arriba del reporte
     st.markdown(badge_html, unsafe_allow_html=True)
     
     # Mostrar el contenido completo de la IA
