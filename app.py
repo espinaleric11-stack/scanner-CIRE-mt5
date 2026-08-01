@@ -301,12 +301,18 @@ def imagen_a_base64(img):
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
+# El botón de escaneo ahora se mantiene siempre visible para que esté disponible en cualquier momento
+st.markdown("<br>", unsafe_allow_html=True)
+ejecutar_escaneo = st.button("🚀 EJECUTAR ESCANEO NEURONAL")
+
 if imagen is not None:
     st.image(imagen, caption=f"Monitoreando Símbolo: {activo} [{temporalidad}]", use_container_width=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Botón manual habilitado para ejecutarse al hacer clic en cuanto se cargue la captura
-    if st.button("🚀 EJECUTAR ESCANEO NEURONAL"):
+if ejecutar_escaneo:
+    if imagen is None:
+        st.warning("⚠️ Por favor, pega o sube una captura de pantalla antes de ejecutar el escaneo.")
+    else:
         try:
             with st.spinner("🧠 Verificando activo en captura y analizando geometría de mercado..."):
                 imagen_base64 = imagen_a_base64(imagen)
