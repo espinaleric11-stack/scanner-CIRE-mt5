@@ -163,7 +163,7 @@ with st.sidebar:
       <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js" async>
       {
       "width": "100%",
-      "height": "320",
+      "height": "300",
       "symbolsGroups": [
         {
           "name": "Forex & Metales",
@@ -189,7 +189,7 @@ with st.sidebar:
     }
       </script>
     </div>
-    """, height=330)
+    """, height=310)
 
     st.markdown("---")
     st.markdown("### 🕒 Historial de Escaneos")
@@ -201,38 +201,49 @@ with st.sidebar:
                 st.session_state["resultado_activo"] = item["resultado"]
 
     st.markdown("---")
-    st.markdown("### 🧮 Calculadora de Lotaje")
+    st.markdown("### 🧮 Gestión de Riesgo y Lotaje")
     
+    # Amplia variedad de brókers con especificación de valor de pip/contrato
     broker_seleccionado = st.selectbox(
         "🏢 Seleccionar Bróker", 
-        ["Exness (Estándar/Pro)", "IC Markets (Raw/Standard)", "RoboForex (ProCent/ECN)", "XM (Ultra Low)", "Deriv (Deriv MT5)"]
+        [
+            "Exness (Estándar / Pro - 1 lote = $10/pip)", 
+            "IC Markets (Raw / Standard - 1 lote = $10/pip)", 
+            "RoboForex (ProCent - 1 lote Cent = $0.10/pip)", 
+            "XM (Ultra Low - 1 lote = $10/pip)", 
+            "Deriv (Deriv MT5 - Sintéticos/Derivados)",
+            "Pepperstone (Razor / Standard)",
+            "FBS (Standard / Cent)",
+            "Hantec Markets (ECN)",
+            "Tickmill (Pro / Classic)"
+        ]
     )
     
-    capital_cuenta = st.number_input("Capital Cuenta ($)", min_value=10.0, value=1000.0, step=50.0, key="side_cap")
-    porcentaje_riesgo = st.number_input("Riesgo Máximo (%)", min_value=0.1, max_value=20.0, value=1.0, step=0.1, key="side_riesgo")
-    distancia_sl_pips = st.number_input("Distancia SL (Pips/Puntos)", min_value=1.0, value=30.0, step=1.0, key="side_sl")
+    capital_cuenta = st.number_input("Capital Cuenta ($)", min_value=1.0, value=1000.0, step=50.0, key="side_cap")
+    porcentaje_riesgo = st.number_input("Riesgo Máximo (%)", min_value=0.1, max_value=50.0, value=1.0, step=0.1, key="side_riesgo")
+    distancia_sl_pips = st.number_input("Distancia Stop Loss (Pips)", min_value=0.1, value=30.0, step=1.0, key="side_sl")
     
     dinero_riesgo = capital_cuenta * (porcentaje_riesgo / 100.0)
     
-    # Asignación de valor de pip según bróker y tipo de activo genérico
-    if "Exness" in broker_seleccionado:
-        valor_pip_estandar = 10.0
-    elif "IC Markets" in broker_seleccionado:
-        valor_pip_estandar = 10.0
-    elif "RoboForex" in broker_seleccionado:
-        valor_pip_estandar = 10.0
-    elif "XM" in broker_seleccionado:
-        valor_pip_estandar = 10.0
+    # Asignación del valor de pip según las especificaciones reales del bróker seleccionado
+    if "ProCent" in broker_seleccionado or "Cent" in broker_seleccionado:
+        valor_pip_por_lote = 0.10  # Cuentas Cent (el valor del pip se reduce x100)
+    elif "Deriv" in broker_seleccionado:
+        valor_pip_por_lote = 1.0   # Índices sintéticos por defecto
     else:
-        valor_pip_estandar = 1.0 # Sintéticos / Deriv
+        valor_pip_por_lote = 10.0  # Cuentas Estándar de Forex Mayor (EURUSD, GBPUSD, etc.)
         
-    lote_sugerido = dinero_riesgo / (distancia_sl_pips * valor_pip_estandar)
+    # Cálculo seguro de lotaje evitando división por cero
+    if distancia_sl_pips > 0:
+        lote_sugerido = dinero_riesgo / (distancia_sl_pips * valor_pip_por_lote)
+    else:
+        lote_sugerido = 0.0
 
     st.markdown(f"""
     <div style="background: rgba(13, 17, 23, 0.95); border: 1px solid #00ffcc; padding: 12px; border-radius: 8px; margin-top: 10px;">
-        <div style="font-size: 13px; color: #8b949e;">Bróker: <b style="color: #00ffcc;">{broker_seleccionado}</b></div>
-        <div style="font-size: 13px; color: #8b949e; margin-top: 4px;">💵 Riesgo: <b style="color: #ff3333;">${dinero_riesgo:.2f}</b></div>
-        <div style="font-size: 14px; color: #00ffcc; margin-top: 6px; font-weight: bold;">📊 Lote: {lote_sugerido:.2f} Lotes</div>
+        <div style="font-size: 12px; color: #8b949e;">Bróker: <b style="color: #00ffcc;">{broker_seleccionado.split(' - ')[0]}</b></div>
+        <div style="font-size: 12px; color: #8b949e; margin-top: 3px;">💵 Riesgo Monetario: <b style="color: #ff3333;">${dinero_riesgo:.2f}</b></div>
+        <div style="font-size: 14px; color: #00ffcc; margin-top: 5px; font-weight: bold;">📊 Lote Sugerido: {lote_sugerido:.2f} Lotes</div>
     </div>
     """, unsafe_allow_html=True)
 
