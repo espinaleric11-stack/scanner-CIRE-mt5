@@ -4,7 +4,6 @@ from io import BytesIO
 from PIL import Image
 import requests
 import streamlit as st
-import streamlit.components.v1 as components
 
 # URL de la imagen para el fondo y la pestaña
 IMAGEN_URL_FONDO_ICONO = "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=1920&auto=format&fit=crop"
@@ -25,10 +24,12 @@ if "historial_scans" not in st.session_state:
 st.markdown(
     f"""
     <style>
+    /* Ocultar la barra superior (Share, GitHub, etc.), el menú principal y el footer de Streamlit */
     header {{visibility: hidden;}}
     #MainMenu {{visibility: hidden;}}
     footer {{visibility: hidden;}}
 
+    /* Fondo personalizado con imagen en la aplicación y rejilla cibernética superpuesta */
     .stApp {{
         background-color: #030712;
         background-image: 
@@ -43,6 +44,7 @@ st.markdown(
         padding-bottom: 140px;
     }}
 
+    /* Contenedor fijo del trazo de electrocardiograma en movimiento al pie de página */
     .ecg-footer-bg {{
         position: fixed;
         bottom: 0;
@@ -63,6 +65,7 @@ st.markdown(
         100% {{ background-position-x: -1200px; }}
     }}
     
+    /* Títulos futuristas con brillo neón */
     h1, h2, h3 {{
         font-family: 'Courier New', Courier, monospace, sans-serif;
         letter-spacing: -0.5px;
@@ -70,6 +73,7 @@ st.markdown(
         text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
     }}
     
+    /* Botón cyberpunk con animación de pulso */
     div.stButton > button {{
         background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
         color: #ffffff;
@@ -87,6 +91,7 @@ st.markdown(
         transform: translateY(-2px);
     }}
     
+    /* Cajas de texto y selectores personalizados con estilo translúcido */
     .stTextInput input, .stSelectbox select, .stNumberInput input {{
         background-color: rgba(13, 17, 23, 0.9) !important;
         color: #00ffcc !important;
@@ -94,6 +99,7 @@ st.markdown(
         border-radius: 6px !important;
     }}
     
+    /* Contenedor holográfico principal para el Setup Táctico Destacado */
     .setup-hologram {{
         background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(0, 30, 40, 0.9) 100%);
         border: 2px solid #00ffcc;
@@ -104,6 +110,7 @@ st.markdown(
         margin-bottom: 25px;
     }}
 
+    /* Botones de acción gigantes estilo HUD Cyberpunk */
     .btn-accion-gigante {{
         text-align: center;
         font-family: 'Courier New', Courier, monospace;
@@ -135,6 +142,7 @@ st.markdown(
         text-shadow: 0 0 10px rgba(255,255,255,0.4);
     }}
 
+    /* Clases de color dinámicas para niveles alcistas y bajistas */
     .precio-alcista {{
         color: #00ff66 !important;
         font-weight: bold;
@@ -169,6 +177,7 @@ st.markdown("<h1 style='text-align: center;'>⚡ MT5-CIRE-SCANER ⚡</h1>", unsa
 st.markdown("<p style='text-align: center; color: #8b949e;'>Sistema autónomo institucional de análisis de price action asistido por IA</p>", unsafe_allow_html=True)
 st.divider()
 
+# Carga segura de la API Key desde los secretos de Streamlit
 try:
     api_key = st.secrets["OPENROUTER_API_KEY"]
 except Exception:
@@ -177,6 +186,7 @@ except Exception:
 
 api_url = "https://openrouter.ai/api/v1/chat/completions"
 
+# Listado completo de símbolos estándar de MT5 + Índices Sintéticos
 simbolos_mt5 = [
     "XAUUSD (Oro vs Dólar)", "XAGUSD (Plata vs Dólar)", "XPTUSD (Platino vs Dólar)", "XPDUSD (Paladio vs Dólar)", 
     "XAUEUR (Oro vs Euro)", "EURUSD (Euro / Dólar)", "GBPUSD (Libra / Dólar)", "USDJPY (Dólar / Yen Japonés)", 
@@ -207,6 +217,7 @@ simbolos_mt5 = [
     "SUGAR (Azúcar)", "COFFEE (Café)", "CORN (Maíz)", "WHEAT (Trigo)"
 ]
 
+# Controles de Activo y Temporalidad
 col1, col2 = st.columns(2)
 with col1:
     activo_seleccionado = st.selectbox("📊 Símbolo / Activo MT5", simbolos_mt5, index=0)
@@ -215,104 +226,19 @@ with col1:
 with col2:
     temporalidad = st.selectbox("⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN"])
 
-st.markdown("### 📋 Zona Interactiva (Haz clic y presiona **Ctrl + V** para pegar tu captura)")
-
-componente_pegado = components.html(
-    """
-    <div id="drop-zone" style="
-        border: 2px dashed #00ffcc; 
-        background: rgba(13, 17, 23, 0.9); 
-        color: #00ffcc; 
-        padding: 35px; 
-        text-align: center; 
-        border-radius: 12px; 
-        font-family: 'Courier New', Courier, monospace;
-        cursor: pointer;
-        box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
-    ">
-        <div style="font-size: 19px; font-weight: bold; margin-bottom: 8px;">⚡ Haz clic aquí y presiona <span style="color: #ffffff; background: #1f6feb; padding: 3px 8px; border-radius: 4px;">Ctrl + V</span></div>
-        <div style="font-size: 13px; color: #8b949e;" id="status-text">La imagen capturada aparecerá lista para escanear.</div>
-    </div>
-
-    <script>
-    const zone = document.getElementById('drop-zone');
-    const statusText = document.getElementById('status-text');
-
-    window.addEventListener('paste', async (e) => {
-        const items = e.clipboardData.items;
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-                const blob = items[i].getAsFile();
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const base64data = event.target.result;
-                    statusText.innerHTML = '<span style="color: #00ffcc; font-weight: bold;">✔ ¡Captura cargada! Ya puedes hacer clic en el botón de escaneo.</span>';
-                    zone.style.borderColor = '#00ffcc';
-                    window.parent.postMessage({isStreamlitMessage: true, type: 'streamlit:setComponentValue', value: base64data}, '*');
-                };
-                reader.readAsDataURL(blob);
-                break;
-            }
-        }
-    });
-
-    zone.addEventListener('click', async () => {
-        statusText.innerText = "Esperando pegado... Presiona Ctrl + V ahora.";
-        try {
-            const clipboardItems = await navigator.clipboard.read();
-            for (const clipboardItem of clipboardItems) {
-                for (const type of clipboardItem.types) {
-                    if (type.startsWith('image/')) {
-                        const blob = await clipboardItem.getType(type);
-                        const reader = new FileReader();
-                        reader.onload = function(event) {
-                            const base64data = event.target.result;
-                            statusText.innerHTML = '<span style="color: #00ffcc; font-weight: bold;">✔ ¡Captura cargada desde el portapapeles!</span>';
-                            zone.style.borderColor = '#00ffcc';
-                            window.parent.postMessage({isStreamlitMessage: true, type: 'streamlit:setComponentValue', value: base64data}, '*');
-                        };
-                        reader.readAsDataURL(blob);
-                        return;
-                    }
-                }
-            }
-        } catch (err) {}
-    });
-    </script>
-    """,
-    height=145,
-)
-
-archivo_imagen = st.file_uploader("📁 Opcional: O sube la captura de forma tradicional (PNG, JPG)", type=["png", "jpg", "jpeg"])
-
-imagen = None
-if archivo_imagen is not None:
-    imagen = Image.open(archivo_imagen)
-elif componente_pegado is not None and isinstance(componente_pegado, str) and componente_pegado.startswith("data:image"):
-    try:
-        header, encoded = componente_pegado.split(",", 1)
-        image_bytes = base64.b64decode(encoded)
-        imagen = Image.open(BytesIO(image_bytes))
-    except Exception:
-        pass
+archivo_imagen = st.file_uploader("📁 Sube la captura de pantalla de tu gráfico MT5 (PNG, JPG)", type=["png", "jpg", "jpeg"])
 
 def imagen_a_base64(img):
     buffered = BytesIO()
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
-# El botón de escaneo ahora se mantiene siempre visible para que esté disponible en cualquier momento
-st.markdown("<br>", unsafe_allow_html=True)
-ejecutar_escaneo = st.button("🚀 EJECUTAR ESCANEO NEURONAL")
-
-if imagen is not None:
+if archivo_imagen is not None:
+    imagen = Image.open(archivo_imagen)
     st.image(imagen, caption=f"Monitoreando Símbolo: {activo} [{temporalidad}]", use_container_width=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
-if ejecutar_escaneo:
-    if imagen is None:
-        st.warning("⚠️ Por favor, pega o sube una captura de pantalla antes de ejecutar el escaneo.")
-    else:
+    if st.button("🚀 EJECUTAR ESCANEO NEURONAL"):
         try:
             with st.spinner("🧠 Verificando activo en captura y analizando geometría de mercado..."):
                 imagen_base64 = imagen_a_base64(imagen)
@@ -371,6 +297,7 @@ if ejecutar_escaneo:
 
                     st.success("✨ ¡Análisis completado con éxito!")
                     
+                    # Guardar en Historial de sesión
                     st.session_state.historial_scans.insert(0, {
                         "activo": activo,
                         "temporalidad": temporalidad,
@@ -384,15 +311,19 @@ if ejecutar_escaneo:
         except Exception as e:
             st.error(f"❌ Error crítico en el proceso: {e}")
 
+# Mostrar el resultado actual (o el seleccionado del historial)
 if "resultado_activo" in st.session_state:
     texto_res = st.session_state["resultado_activo"]
     
+    # Comprobación de discrepancia reportada por la IA para mostrar una alerta visual
     if "ADVERTENCIA DE DISCREPANCIA" in texto_res.upper() or "NO COINCIDE" in texto_res.upper():
         st.warning("⚠️ **ALERTA INSTITUCIONAL:** La IA ha detectado una posible discrepancia entre el activo que seleccionaste en el menú y el símbolo impreso en la captura de pantalla. Revisa el reporte detallado más abajo.")
 
+    # Extracción por expresión regular del porcentaje generado por la IA (ej: "85%")
     match_porcentaje = re.search(r'(\d{1,3}\s*%)', texto_res)
     porcentaje_str = match_porcentaje.group(1) if match_porcentaje else "N/D"
 
+    # Detección inteligente de la orden operativa para el botón gigante
     texto_upper = texto_res.upper()
     if "COMPRA" in texto_upper or "BUY" in texto_upper:
         badge_html = f'<div class="btn-accion-gigante badge-compra">🟢 SEÑAL DE COMPRA (BUY) | CONFIANZA: {porcentaje_str}</div>'
@@ -403,9 +334,14 @@ if "resultado_activo" in st.session_state:
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🛰️ SETUP TÁCTICO DE ALTA PRIORIDAD", unsafe_allow_html=True)
+    
+    # Renderizar el botón gigante con el porcentaje incluido
     st.markdown(badge_html, unsafe_allow_html=True)
+    
+    # Mostrar el contenido completo de la IA
     st.markdown(f"<div class='setup-hologram'>{texto_res}</div>", unsafe_allow_html=True)
 
+    # --- CALCULADORA DE GESTIÓN DE RIESGO Y LOTAJE AVANZADA ---
     with st.expander("🧮 Calculadora de Gestión de Riesgo y Lotaje Profesional"):
         st.markdown("Calcula el tamaño de lote institucional basándose en la distancia de tu Stop Loss.")
         
@@ -417,7 +353,10 @@ if "resultado_activo" in st.session_state:
         with col_c3:
             distancia_sl_pips = st.number_input("Distancia Stop Loss (Pips/Puntos)", min_value=1.0, value=30.0, step=1.0)
         
+        # Cálculo de dinero a arriesgar
         dinero_riesgo = capital_cuenta * (porcentaje_riesgo / 100.0)
+        
+        # Estimación de lotaje estándar (Asumiendo 1 lote estándar = $10 por pip para Forex mayor)
         valor_pip_estandar = 10.0 
         lote_sugerido = dinero_riesgo / (distancia_sl_pips * valor_pip_estandar)
 
