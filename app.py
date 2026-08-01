@@ -152,54 +152,37 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- PANEL LATERAL: TICKER COMPACTO, GESTIÓN DE RIESGO E HISTORIAL ---
+# --- PANEL LATERAL: TICKER ESTILO MT5 (MINIMALISTA CON SÍMBOLO, BID, ASK, CAMBIO), GESTIÓN DE RIESGO E HISTORIAL ---
 with st.sidebar:
     modelo_seleccionado = "openrouter/auto"
     
     st.markdown("### 📈 Cotizaciones en Vivo")
+    
+    # Widget de TradingView optimizado con columnas estilo Observación de Mercado de MT5 (Símbolo, Bid, Ask, Cambio)
     components.html("""
     <div class="tradingview-widget-container">
       <div class="tradingview-widget-container__widget"></div>
       <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js" async>
       {
       "width": "100%",
-      "height": "280",
+      "height": "250",
       "symbolsGroups": [
         {
-          "name": "Metales",
+          "name": "MT5 Watchlist",
           "symbols": [
             { "name": "OANDA:XAUUSD", "displayName": "XAUUSD" },
-            { "name": "OANDA:XAUEUR", "displayName": "XAUEUR" },
-            { "name": "OANDA:XAGUSD", "displayName": "XAGUSD" },
-            { "name": "FX_IDC:XPTUSD", "displayName": "XPTUSD" }
-          ]
-        },
-        {
-          "name": "Forex Majors",
-          "symbols": [
             { "name": "FX:EURUSD", "displayName": "EURUSD" },
-            { "name": "FX:GBPUSD", "displayName": "GBPUSD" },
+            { "name": "FX:NZDUSD", "displayName": "NZDUSD" },
+            { "name": "FOREXCOM:SPX500", "displayName": "SP500" },
             { "name": "FX:USDJPY", "displayName": "USDJPY" },
-            { "name": "FX:AUDUSD", "displayName": "AUDUSD" }
-          ]
-        },
-        {
-          "name": "Índices",
-          "symbols": [
-            { "name": "FOREXCOM:US30", "displayName": "US30" },
-            { "name": "FOREXCOM:NAS100", "displayName": "NAS100" },
-            { "name": "FOREXCOM:SPX500", "displayName": "SPX500" },
-            { "name": "FOREXCOM:GER40", "displayName": "GER40" }
-          ]
-        },
-        {
-          "name": "Criptomonedas",
-          "symbols": [
-            { "name": "BINANCE:BTCUSDT", "displayName": "BTCUSD" },
-            { "name": "BINANCE:ETHUSDT", "displayName": "ETHUSD" },
-            { "name": "BINANCE:SOLUSDT", "displayName": "SOLUSD" }
+            { "name": "BINANCE:BTCUSDT", "displayName": "BTCUSD" }
           ]
         }
+      ],
+      "columns": [
+        "bid",
+        "ask",
+        "change"
       ],
       "showSymbolLogo": false,
       "isTransparent": true,
@@ -208,7 +191,7 @@ with st.sidebar:
     }
       </script>
     </div>
-    """, height=290)
+    """, height=260)
 
     st.markdown("---")
     st.markdown("### 🧮 Gestión de Riesgo y Lotaje")
