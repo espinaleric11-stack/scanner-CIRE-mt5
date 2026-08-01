@@ -9,7 +9,7 @@ st.set_page_config(
     page_title="MT5-CIRE-SCANER", page_icon="⚡", layout="centered"
 )
 
-# Estilos CSS con Fondo Futurista Avanzado y Trazo de Electrocardiograma (ECG) en Movimiento al Pie de Página
+# Estilos CSS con Fondo Futurista Avanzado, Trazo de ECG en el Pie y Colores Dinámicos para Precios
 st.markdown(
     """
     <style>
@@ -25,10 +25,10 @@ st.markdown(
         color: #c9d1d9;
         position: relative;
         min-height: 100vh;
-        padding-bottom: 140px; /* Espacio para que el trazo inferior no se superponga al contenido */
+        padding-bottom: 140px;
     }
 
-    /* Contenedor fijo del trazo de electrocardiograma en movimiento al fondo (pie) de la página */
+    /* Contenedor fijo del trazo de electrocardiograma en movimiento al pie de página */
     .ecg-footer-bg {
         position: fixed;
         bottom: 0;
@@ -91,6 +91,18 @@ st.markdown(
         padding: 22px;
         border-radius: 8px;
         box-shadow: 0 8px 32px rgba(0, 255, 204, 0.15);
+    }
+
+    /* Clases de color dinámicas para niveles alcistas (verde) y bajistas (rojo) */
+    .precio-alcista {
+        color: #00ff66 !important;
+        font-weight: bold;
+        text-shadow: 0 0 8px rgba(0, 255, 102, 0.4);
+    }
+    .precio-bajista {
+        color: #ff3333 !important;
+        font-weight: bold;
+        text-shadow: 0 0 8px rgba(255, 51, 51, 0.4);
     }
     </style>
 
@@ -289,6 +301,10 @@ if archivo_imagen is not None:
                        - **Stop Loss (SL):** (Nivel recomendado)
                        - **Take Profit (TP):** (Nivel objetivo)
                     5. **Gestión de Riesgo:** Breve advertencia o confirmación a esperar.
+
+                    INSTRUCCIÓN DE FORMATO CRÍCITA PARA LOS PRECIOS:
+                    - Envuelve cada valor numérico o nivel de precio que sea de naturaleza alcista, soporte de compra, objetivo superior o favorable al alza dentro de etiquetas HTML con la clase CSS exactamente así: <span class="precio-alcista">PRECIO</span>.
+                    - Envuelve cada valor numérico o nivel de precio que sea de naturaleza bajista, resistencia de venta, objetivo inferior, stop loss de riesgo o favorable a la baja dentro de etiquetas HTML con la clase CSS exactamente así: <span class="precio-bajista">PRECIO</span>.
                     """
 
           headers = {
