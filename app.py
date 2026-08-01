@@ -9,13 +9,19 @@ st.set_page_config(
     page_title="MT5-CIRE-SCANER", page_icon="⚡", layout="centered"
 )
 
-# Estilos CSS Futuristas / Cyberpunk con efectos de neón y terminal financiera
+# Estilos CSS con Fondo Futurista Avanzado (Efecto Cyberpunk / Grid Neón Holográfico)
 st.markdown(
     """
     <style>
-    /* Fondo general y tipografía estilo terminal */
+    /* Fondo futurista con rejilla cibernética y gradientes de profundidad */
     .stApp {
-        background: radial-gradient(circle at 50% 10%, #080c14 0%, #010409 100%);
+        background-color: #030712;
+        background-image: 
+            radial-gradient(circle at 50% 20%, rgba(0, 255, 204, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(0, 180, 216, 0.05) 0%, transparent 40%),
+            linear-gradient(to right, rgba(31, 111, 235, 0.03) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(31, 111, 235, 0.03) 1px, transparent 1px);
+        background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
         color: #c9d1d9;
     }
     
@@ -45,9 +51,9 @@ st.markdown(
         transform: translateY(-2px);
     }
     
-    /* Cajas de texto y selectores personalizados */
+    /* Cajas de texto y selectores personalizados con estilo translúcido */
     .stTextInput input, .stSelectbox select {
-        background-color: #0d1117 !important;
+        background-color: rgba(13, 17, 23, 0.9) !important;
         color: #00ffcc !important;
         border: 1px solid #1f6feb !important;
         border-radius: 6px !important;
