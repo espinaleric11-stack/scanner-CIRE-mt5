@@ -152,7 +152,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- PANEL LATERAL: TICKER DE TRADINGVIEW AMPLIADO & HISTORIAL ---
+# --- PANEL LATERAL: TICKER, GESTIÓN DE RIESGO E HISTORIAL ---
 with st.sidebar:
     modelo_seleccionado = "openrouter/auto"
     
@@ -201,15 +201,6 @@ with st.sidebar:
     """, height=430)
 
     st.markdown("---")
-    st.markdown("### 🕒 Historial de Escaneos")
-    if not st.session_state.historial_scans:
-        st.info("No hay análisis previos en esta sesión.")
-    else:
-        for i, item in enumerate(st.session_state.historial_scans):
-            if st.button(f"📌 {item['activo']} ({item['temporalidad']})", key=f"hist_{i}"):
-                st.session_state["resultado_activo"] = item["resultado"]
-
-    st.markdown("---")
     st.markdown("### 🧮 Gestión de Riesgo y Lotaje")
     
     broker_seleccionado = st.selectbox(
@@ -253,6 +244,15 @@ with st.sidebar:
         <div style="font-size: 14px; color: #00ffcc; margin-top: 5px; font-weight: bold;">📊 Lote Sugerido: {lote_sugerido:.2f} Lotes</div>
     </div>
     """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("### 🕒 Historial de Escaneos")
+    if not st.session_state.historial_scans:
+        st.info("No hay análisis previos en esta sesión.")
+    else:
+        for i, item in enumerate(st.session_state.historial_scans):
+            if st.button(f"📌 {item['activo']} ({item['temporalidad']})", key=f"hist_{i}"):
+                st.session_state["resultado_activo"] = item["resultado"]
 
 # Encabezado principal
 st.markdown("<h1 style='text-align: center;'>⚡ MT5-CIRE-SCANER ⚡</h1>", unsafe_allow_html=True)
@@ -331,7 +331,6 @@ with col2:
     temporalidad = st.selectbox("⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN"])
 
 # --- INFORMACIÓN DE MERCADO DEBAJO DEL SELECTOR ---
-# Base de datos local detallada para los activos principales y generales de MT5
 info_mercados_db = {
     "XAUUSD": {"tipo": "Metal Precioso", "spread": "Promedio 12-25 pips", "sesion": "Londres / Nueva York", "apalancamiento": "Hasta 1:500 o 1:2000"},
     "EURUSD": {"tipo": "Forex Major", "spread": "Promedio 0-8 pips", "sesion": "Londres / Nueva York", "apalancamiento": "Hasta 1:500 o 1:2000"},
@@ -343,7 +342,6 @@ info_mercados_db = {
     "WTI": {"tipo": "Materia Prima (Energía)", "spread": "Promedio 3-6 pips", "sesion": "Global / NYMEX", "apalancamiento": "Hasta 1:100 o 1:200"}
 }
 
-# Obtener información específica o por defecto según el activo elegido
 info_actual = info_mercados_db.get(activo, {
     "tipo": "Instrumento Financiero MT5", 
     "spread": "Dinámico (Verificar en Terminal)", 
