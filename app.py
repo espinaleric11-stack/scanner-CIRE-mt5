@@ -9,7 +9,7 @@ st.set_page_config(
     page_title="MT5-CIRE-SCANER", page_icon="⚡", layout="centered"
 )
 
-# Estilos CSS con Fondo Futurista Avanzado (Efecto Cyberpunk / Grid Neón Holográfico)
+# Estilos CSS con Fondo Futurista Avanzado y Trazo de Electrocardiograma (ECG) en Movimiento al Pie de Página
 st.markdown(
     """
     <style>
@@ -23,6 +23,30 @@ st.markdown(
             linear-gradient(to bottom, rgba(31, 111, 235, 0.03) 1px, transparent 1px);
         background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
         color: #c9d1d9;
+        position: relative;
+        min-height: 100vh;
+        padding-bottom: 140px; /* Espacio para que el trazo inferior no se superponga al contenido */
+    }
+
+    /* Contenedor fijo del trazo de electrocardiograma en movimiento al fondo (pie) de la página */
+    .ecg-footer-bg {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        height: 100px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,60 L350,60 L370,20 L390,100 L410,10 L430,90 L450,60 L1200,60' fill='none' stroke='%2300ffcc' stroke-width='2' stroke-opacity='0.35'/%3E%3C/svg%3E");
+        background-repeat: repeat-x;
+        background-size: 1200px 100px;
+        animation: ecg-footer-move 5s linear infinite;
+        pointer-events: none;
+        z-index: 999;
+        box-shadow: 0 -5px 20px rgba(0, 255, 204, 0.1);
+    }
+
+    @keyframes ecg-footer-move {
+        0% { background-position-x: 0px; }
+        100% { background-position-x: -1200px; }
     }
     
     /* Títulos futuristas con brillo neón */
@@ -69,6 +93,9 @@ st.markdown(
         box-shadow: 0 8px 32px rgba(0, 255, 204, 0.15);
     }
     </style>
+
+    <!-- Elemento visual flotante del ECG en el pie de página -->
+    <div class="ecg-footer-bg"></div>
     """,
     unsafe_allow_html=True,
 )
