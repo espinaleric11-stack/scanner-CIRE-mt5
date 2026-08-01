@@ -21,9 +21,6 @@ st.set_page_config(
 if "historial_scans" not in st.session_state:
     st.session_state.historial_scans = []
 
-if "imagen_clipboard" not in st.session_state:
-    st.session_state.imagen_clipboard = None
-
 # Estilos CSS con Ocultamiento de la Barra Superior, Fondo Personalizado y Alertas
 st.markdown(
     f"""
@@ -71,23 +68,6 @@ st.markdown(
         letter-spacing: -0.5px;
         color: #00ffcc;
         text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
-    }}
-    
-    div.stButton > button {{
-        background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
-        color: #ffffff;
-        border: 1px solid #00ffcc;
-        border-radius: 8px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        width: 100%;
-        box-shadow: 0 0 15px rgba(0, 180, 216, 0.5);
-        transition: all 0.3s ease;
-    }}
-    div.stButton > button:hover {{
-        background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%);
-        box-shadow: 0 0 25px rgba(0, 255, 204, 0.8);
-        transform: translateY(-2px);
     }}
     
     .stTextInput input, .stSelectbox select, .stNumberInput input {{
@@ -220,7 +200,6 @@ with col2:
 
 st.markdown("### 📋 Zona Interactiva (Haz clic y presiona **Ctrl + V** para pegar tu captura)")
 
-# Componente HTML de alta compatibilidad para pegar desde portapapeles y actualizar session_state nativamente
 componente_pegado = components.html(
     """
     <div id="drop-zone" style="
@@ -235,7 +214,7 @@ componente_pegado = components.html(
         box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
     ">
         <div style="font-size: 19px; font-weight: bold; margin-bottom: 8px;">⚡ Haz clic aquí y presiona <span style="color: #ffffff; background: #1f6feb; padding: 3px 8px; border-radius: 4px;">Ctrl + V</span></div>
-        <div style="font-size: 13px; color: #8b949e;" id="status-text">La imagen capturada aparecerá automáticamente aquí al pegarla.</div>
+        <div style="font-size: 13px; color: #8b949e;" id="status-text">El escaneo neuronal se activará automáticamente al pegar.</div>
     </div>
 
     <script>
@@ -250,12 +229,9 @@ componente_pegado = components.html(
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const base64data = event.target.result;
-                    statusText.innerHTML = '<span style="color: #00ff66; font-weight: bold;">✔ ¡Captura cargada con éxito! Ya puedes ejecutar el escaneo.</span>';
+                    statusText.innerHTML = '<span style="color: #00ff66; font-weight: bold;">✔ ¡Captura recibida! Ejecutando escaneo automático...</span>';
                     zone.style.borderColor = '#00ff66';
-                    
-                    // Enviar datos hacia Streamlit
-                    const dataToSend = {isStreamlitMessage: true, type: 'streamlit:setComponentValue', value: base64data};
-                    window.parent.postMessage(dataToSend, '*');
+                    window.parent.postMessage({isStreamlitMessage: true, type: 'streamlit:setComponentValue', value: base64data}, '*');
                 };
                 reader.readAsDataURL(blob);
                 break;
@@ -264,7 +240,7 @@ componente_pegado = components.html(
     });
 
     zone.addEventListener('click', async () => {
-        statusText.innerText = "Esperando pegado... Asegúrate de presionar Ctrl + V ahora.";
+        statusText.innerText = "Esperando pegado... Presiona Ctrl + V ahora.";
         try {
             const clipboardItems = await navigator.clipboard.read();
             for (const clipboardItem of clipboardItems) {
@@ -274,7 +250,7 @@ componente_pegado = components.html(
                         const reader = new FileReader();
                         reader.onload = function(event) {
                             const base64data = event.target.result;
-                            statusText.innerHTML = '<span style="color: #00ff66; font-weight: bold;">✔ ¡Captura cargada desde el portapapeles!</span>';
+                            statusText.innerHTML = '<span style="color: #00ff66; font-weight: bold;">✔ ¡Captura cargada! Ejecutando escaneo automático...</span>';
                             zone.style.borderColor = '#00ff66';
                             window.parent.postMessage({isStreamlitMessage: true, type: 'streamlit:setComponentValue', value: base64data}, '*');
                         };
@@ -283,16 +259,13 @@ componente_pegado = components.html(
                     }
                 }
             }
-        } catch (err) {
-            // Si el navegador bloquea clipboard.read(), el evento global 'paste' de arriba se encargará perfectamente
-        }
+        } catch (err) {}
     });
     </script>
     """,
     height=145,
 )
 
-# Respaldo con subida de archivo tradicional
 archivo_imagen = st.file_uploader("📁 Opcional: O sube la captura de forma tradicional (PNG, JPG)", type=["png", "jpg", "jpeg"])
 
 imagen = None
@@ -311,13 +284,26 @@ def imagen_a_base64(img):
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
+# Detectar automáticamente si hay una nueva imagen cargada para ejecutar el escaneo sin botón
 if imagen is not None:
+    # Generar un hash único de la imagen para evitar bucles si es la misma
+    img_bytes_Check = BytesIO()
+    imagen.save(img_bytes_Check, format="PNG")
+    img_hash = hash(img_bytes_Check.getvalue())
+
+    if st.session_state.get("ultimo_img_hash") != img_hash:
+        st.session_state["ultimo_img_hash"] = img_hash
+        st.session_state["ejecutar_automatico"] = True
+    else:
+        st.session_state["ejecutar_automatico"] = False
+
     st.image(imagen, caption=f"Monitoreando Símbolo: {activo} [{temporalidad}]", use_container_width=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
-    if st.button("🚀 EJECUTAR ESCANEO NEURONAL"):
+    # Disparador automático del escaneo neuronal
+    if st.session_state.get("ejecutar_automatico", False):
         try:
-            with st.spinner("🧠 Verificando activo en captura y analizando geometría de mercado..."):
+            with st.spinner("🧠 Captura detectada. Verificando activo y ejecutando análisis institucional automático..."):
                 imagen_base64 = imagen_a_base64(imagen)
 
                 prompt = f"""
@@ -372,7 +358,7 @@ if imagen is not None:
                     resultado_json = response.json()
                     texto_respuesta = resultado_json["choices"][0]["message"]["content"]
 
-                    st.success("✨ ¡Análisis completado con éxito!")
+                    st.success("✨ ¡Análisis completado automáticamente!")
                     
                     st.session_state.historial_scans.insert(0, {
                         "activo": activo,
@@ -380,6 +366,8 @@ if imagen is not None:
                         "resultado": texto_respuesta
                     })
                     st.session_state["resultado_activo"] = texto_respuesta
+                    st.session_state["ejecutar_automatico"] = False
+                    st.rerun()
 
                 else:
                     st.error(f"❌ Error en la conexión de red ({response.status_code}): {response.text}")
