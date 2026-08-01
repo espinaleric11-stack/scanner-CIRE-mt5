@@ -4,6 +4,7 @@ from io import BytesIO
 from PIL import Image
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 
 # URL de la imagen para el fondo y la pestaña
 IMAGEN_URL_FONDO_ICONO = "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=1920&auto=format&fit=crop"
@@ -24,12 +25,10 @@ if "historial_scans" not in st.session_state:
 st.markdown(
     f"""
     <style>
-    /* Ocultar la barra superior (Share, GitHub, etc.), el menú principal y el footer de Streamlit */
     header {{visibility: hidden;}}
     #MainMenu {{visibility: hidden;}}
     footer {{visibility: hidden;}}
 
-    /* Fondo personalizado con imagen en la aplicación y rejilla cibernética superpuesta */
     .stApp {{
         background-color: #030712;
         background-image: 
@@ -44,7 +43,6 @@ st.markdown(
         padding-bottom: 140px;
     }}
 
-    /* Contenedor fijo del trazo de electrocardiograma en movimiento al pie de página */
     .ecg-footer-bg {{
         position: fixed;
         bottom: 0;
@@ -65,7 +63,6 @@ st.markdown(
         100% {{ background-position-x: -1200px; }}
     }}
     
-    /* Títulos futuristas con brillo neón */
     h1, h2, h3 {{
         font-family: 'Courier New', Courier, monospace, sans-serif;
         letter-spacing: -0.5px;
@@ -73,7 +70,6 @@ st.markdown(
         text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
     }}
     
-    /* Botón cyberpunk con animación de pulso */
     div.stButton > button {{
         background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
         color: #ffffff;
@@ -86,12 +82,11 @@ st.markdown(
         transition: all 0.3s ease;
     }}
     div.stButton > button:hover {{
-        background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%);
+        background: linear-gradient(135deg, #0077b6 100%, #00b4d8 100%);
         box-shadow: 0 0 25px rgba(0, 255, 204, 0.8);
         transform: translateY(-2px);
     }}
     
-    /* Cajas de texto y selectores personalizados con estilo translúcido */
     .stTextInput input, .stSelectbox select, .stNumberInput input {{
         background-color: rgba(13, 17, 23, 0.9) !important;
         color: #00ffcc !important;
@@ -99,7 +94,6 @@ st.markdown(
         border-radius: 6px !important;
     }}
     
-    /* Contenedor holográfico principal para el Setup Táctico Destacado */
     .setup-hologram {{
         background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(0, 30, 40, 0.9) 100%);
         border: 2px solid #00ffcc;
@@ -110,7 +104,6 @@ st.markdown(
         margin-bottom: 25px;
     }}
 
-    /* Botones de acción gigantes estilo HUD Cyberpunk */
     .btn-accion-gigante {{
         text-align: center;
         font-family: 'Courier New', Courier, monospace;
@@ -142,7 +135,6 @@ st.markdown(
         text-shadow: 0 0 10px rgba(255,255,255,0.4);
     }}
 
-    /* Clases de color dinámicas para niveles alcistas y bajistas */
     .precio-alcista {{
         color: #00ff66 !important;
         font-weight: bold;
@@ -160,10 +152,193 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- PANEL LATERAL: HISTORIAL DE ESCANEOS ---
+# --- PANEL LATERAL: TICKER, GESTIÓN DE RIESGO E HISTORIAL ---
 with st.sidebar:
     modelo_seleccionado = "openrouter/auto"
     
+    st.markdown("### 📈 Cotizaciones en Vivo")
+    components.html("""
+    <div class="tradingview-widget-container">
+      <div class="tradingview-widget-container__widget"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js" async>
+      {
+      "width": "100%",
+      "height": "520",
+      "symbolsGroups": [
+        {
+          "name": "Metales",
+          "symbols": [
+            { "name": "OANDA:XAUUSD", "displayName": "XAUUSD (Oro vs Dólar)" },
+            { "name": "OANDA:XAUEUR", "displayName": "XAUEUR (Oro vs Euro)" },
+            { "name": "OANDA:XAGUSD", "displayName": "XAGUSD (Plata vs Dólar)" },
+            { "name": "OANDA:XAGEUR", "displayName": "XAGEUR (Plata vs Euro)" },
+            { "name": "FX_IDC:XPTUSD", "displayName": "XPTUSD (Platino vs Dólar)" },
+            { "name": "FX_IDC:XPDUSD", "displayName": "XPDUSD (Paladio vs Dólar)" },
+            { "name": "TVC:COPPER", "displayName": "COPPER (Cobre)" }
+          ]
+        },
+        {
+          "name": "Forex Majors",
+          "symbols": [
+            { "name": "FX:EURUSD", "displayName": "EURUSD (Euro / Dólar)" },
+            { "name": "FX:GBPUSD", "displayName": "GBPUSD (Libra / Dólar)" },
+            { "name": "FX:USDJPY", "displayName": "USDJPY (Dólar / Yen Japonés)" },
+            { "name": "FX:AUDUSD", "displayName": "AUDUSD (Dólar Australiano / Dólar)" },
+            { "name": "FX:USDCAD", "displayName": "USDCAD (Dólar / Dólar Canadiense)" },
+            { "name": "FX:NZDUSD", "displayName": "NZDUSD (Dólar Neozelandés / Dólar)" },
+            { "name": "FX:USDCHF", "displayName": "USDCHF (Dólar / Franco Suizo)" }
+          ]
+        },
+        {
+          "name": "Forex Crosses",
+          "symbols": [
+            { "name": "FX:EURGBP", "displayName": "EURGBP (Euro / Libra Esterlina)" },
+            { "name": "FX:EURJPY", "displayName": "EURJPY (Euro / Yen Japonés)" },
+            { "name": "FX:GBPJPY", "displayName": "GBPJPY (Libra / Yen Japonés)" },
+            { "name": "FX:AUDJPY", "displayName": "AUDJPY (Australiano / Yen Japonés)" },
+            { "name": "FX:CADJPY", "displayName": "CADJPY (Canadiense / Yen Japonés)" },
+            { "name": "FX:CHFJPY", "displayName": "CHFJPY (Franco / Yen Japonés)" },
+            { "name": "FX:EURAUD", "displayName": "EURAUD (Euro / Australiano)" },
+            { "name": "FX:EURCAD", "displayName": "EURCAD (Euro / Canadiense)" },
+            { "name": "FX:EURNZD", "displayName": "EURNZD (Euro / Neozelandés)" },
+            { "name": "FX:EURCHF", "displayName": "EURCHF (Euro / Franco Suizo)" },
+            { "name": "FX:GBPAUD", "displayName": "GBPAUD (Libra / Australiano)" },
+            { "name": "FX:GBPCAD", "displayName": "GBPCAD (Libra / Canadiense)" },
+            { "name": "FX:GBPNZD", "displayName": "GBPNZD (Libra / Neozelandés)" },
+            { "name": "FX:GBPCHF", "displayName": "GBPCHF (Libra / Franco Suizo)" },
+            { "name": "FX:AUDCAD", "displayName": "AUDCAD (Australiano / Canadiense)" },
+            { "name": "FX:AUDNZD", "displayName": "AUDNZD (Australiano / Neozelandés)" },
+            { "name": "FX:AUDCHF", "displayName": "AUDCHF (Australiano / Franco)" },
+            { "name": "FX:NZDCAD", "displayName": "NZDCAD (Neozelandés / Canadiense)" },
+            { "name": "FX:NZDCHF", "displayName": "NZDCHF (Neozelandés / Franco)" },
+            { "name": "FX:NZDJPY", "displayName": "NZDJPY (Neozelandés / Yen)" },
+            { "name": "FX:CADCHF", "displayName": "CADCHF (Canadiense / Franco)" }
+          ]
+        },
+        {
+          "name": "Forex Exotics",
+          "symbols": [
+            { "name": "FX_IDC:USDMXN", "displayName": "USDMXN (Dólar / Peso Mexicano)" },
+            { "name": "FX_IDC:USDZAR", "displayName": "USDZAR (Dólar / Rand Sudafricano)" },
+            { "name": "FX_IDC:USDTRY", "displayName": "USDTRY (Dólar / Lira Turca)" },
+            { "name": "FX_IDC:USDBRL", "displayName": "USDBRL (Dólar / Real Brasileño)" },
+            { "name": "FX_IDC:USDSGD", "displayName": "USDSGD (Dólar / Dólar de Singapur)" },
+            { "name": "FX_IDC:USDHKD", "displayName": "USDHKD (Dólar / Dólar de Hong Kong)" },
+            { "name": "FX_IDC:USDSEK", "displayName": "USDSEK (Dólar / Corona Sueca)" },
+            { "name": "FX_IDC:USDNOK", "displayName": "USDNOK (Dólar / Corona Noruega)" },
+            { "name": "FX_IDC:USDDKK", "displayName": "USDDKK (Dólar / Corona Danesa)" },
+            { "name": "FX_IDC:USDPLN", "displayName": "USDPLN (Dólar / Zloty Polaco)" },
+            { "name": "FX_IDC:USDHUF", "displayName": "USDHUF (Dólar / Florín Húngaro)" },
+            { "name": "FX_IDC:USDCZK", "displayName": "USDCZK (Dólar / Corona Checa)" }
+          ]
+        },
+        {
+          "name": "Índices Bursátiles",
+          "symbols": [
+            { "name": "FOREXCOM:US30", "displayName": "US30 (Dow Jones)" },
+            { "name": "FOREXCOM:NAS100", "displayName": "NAS100 (Nasdaq 100)" },
+            { "name": "FOREXCOM:SPX500", "displayName": "SPX500 (S&P 500)" },
+            { "name": "FOREXCOM:GER40", "displayName": "GER40 / DAX40 (Alemania 40)" },
+            { "name": "FOREXCOM:UK100", "displayName": "UK100 / FTSE100 (Reino Unido 100)" },
+            { "name": "FOREXCOM:FRA40", "displayName": "FRA40 / CAC40 (Francia 40)" },
+            { "name": "FOREXCOM:JP225", "displayName": "JP225 (Nikkei 225 - Japón)" },
+            { "name": "FOREXCOM:HK50", "displayName": "HK50 (Hang Seng - Hong Kong)" },
+            { "name": "FOREXCOM:AUS200", "displayName": "AUS200 (Australia 200)" },
+            { "name": "TVC:EU50", "displayName": "STOXX50 (Euro Stoxx 50)" },
+            { "name": "BME:IBEX", "displayName": "ESP35 (Ibex 35 - España)" },
+            { "name": "FTSEMIB:FTSEMIB", "displayName": "ITA40 (FTSE MIB - Italia)" },
+            { "name": "SIX:SMI", "displayName": "SMI20 (Swiss Market Index)" }
+          ]
+        },
+        {
+          "name": "Criptomonedas",
+          "symbols": [
+            { "name": "BINANCE:BTCUSDT", "displayName": "BTCUSD (Bitcoin / Dólar)" },
+            { "name": "BINANCE:ETHUSDT", "displayName": "ETHUSD (Ethereum / Dólar)" },
+            { "name": "BINANCE:SOLUSDT", "displayName": "SOLUSD (Solana / Dólar)" },
+            { "name": "BINANCE:XRPUSDT", "displayName": "XRPUSD (Ripple / Dólar)" },
+            { "name": "BINANCE:BNBUSDT", "displayName": "BNBUSD (Binance Coin / Dólar)" },
+            { "name": "BINANCE:ADAUSDT", "displayName": "ADAUSD (Cardano / Dólar)" },
+            { "name": "BINANCE:DOGEUSDT", "displayName": "DOGEUSD (Dogecoin / Dólar)" },
+            { "name": "BINANCE:LTCUSDT", "displayName": "LTCUSD (Litecoin / Dólar)" },
+            { "name": "BINANCE:DOTUSDT", "displayName": "DOTUSD (Polkadot / Dólar)" },
+            { "name": "BINANCE:LINKUSDT", "displayName": "LINKUSD (Chainlink / Dólar)" },
+            { "name": "BINANCE:AVAXUSDT", "displayName": "AVAXUSD (Avalanche / Dólar)" },
+            { "name": "BINANCE:MATICUSDT", "displayName": "MATICUSD (Polygon / Dólar)" },
+            { "name": "BINANCE:SHIBUSDT", "displayName": "SHIBUSD (Shiba Inu / Dólar)" },
+            { "name": "BINANCE:BCHUSDT", "displayName": "BCHUSD (Bitcoin Cash / Dólar)" }
+          ]
+        },
+        {
+          "name": "Commodities & Energías",
+          "symbols": [
+            { "name": "TVC:USOIL", "displayName": "WTI (Petróleo Crudo WTI)" },
+            { "name": "TVC:UKOIL", "displayName": "BRENT (Petróleo Crudo Brent)" },
+            { "name": "NYMEX:NG1!", "displayName": "NATGAS (Gas Natural)" },
+            { "name": "TVC:SUGAR", "displayName": "SUGAR (Azúcar)" },
+            { "name": "TVC:COFFEE", "displayName": "COFFEE (Café)" },
+            { "name": "CBOT:ZC1!", "displayName": "CORN (Maíz)" },
+            { "name": "CBOT:ZW1!", "displayName": "WHEAT (Trigo)" },
+            { "name": "CBOT:ZS1!", "displayName": "SOYBEAN (Soja)" },
+            { "name": "ICEUS:CT1!", "displayName": "COTTON (Algodón)" }
+          ]
+        }
+      ],
+      "showSymbolLogo": true,
+      "isTransparent": true,
+      "colorTheme": "dark",
+      "locale": "es"
+    }
+      </script>
+    </div>
+    """, height=530)
+
+    st.markdown("---")
+    st.markdown("### 🧮 Gestión de Riesgo y Lotaje")
+    
+    broker_seleccionado = st.selectbox(
+        "🏢 Seleccionar Bróker", 
+        [
+            "Vantage Markets (Standard / ECN - 1 lote = $10/pip)",
+            "Exness (Estándar / Pro - 1 lote = $10/pip)", 
+            "IC Markets (Raw / Standard - 1 lote = $10/pip)", 
+            "RoboForex (ProCent - 1 lote Cent = $0.10/pip)", 
+            "XM (Ultra Low - 1 lote = $10/pip)", 
+            "Deriv (Deriv MT5 - Sintéticos/Derivados)",
+            "Pepperstone (Razor / Standard)",
+            "FBS (Standard / Cent)",
+            "Hantec Markets (ECN)",
+            "Tickmill (Pro / Classic)"
+        ]
+    )
+    
+    capital_cuenta = st.number_input("Capital Cuenta ($)", min_value=1.0, value=1000.0, step=50.0, key="side_cap")
+    porcentaje_riesgo = st.number_input("Riesgo Máximo (%)", min_value=0.1, max_value=50.0, value=1.0, step=0.1, key="side_riesgo")
+    distancia_sl_pips = st.number_input("Distancia Stop Loss (Pips)", min_value=0.1, value=30.0, step=1.0, key="side_sl")
+    
+    dinero_riesgo = capital_cuenta * (porcentaje_riesgo / 100.0)
+    
+    if "ProCent" in broker_seleccionado or "Cent" in broker_seleccionado:
+        valor_pip_por_lote = 0.10
+    elif "Deriv" in broker_seleccionado:
+        valor_pip_por_lote = 1.0
+    else:
+        valor_pip_por_lote = 10.0
+        
+    if distancia_sl_pips > 0:
+        lote_sugerido = dinero_riesgo / (distancia_sl_pips * valor_pip_por_lote)
+    else:
+        lote_sugerido = 0.0
+
+    st.markdown(f"""
+    <div style="background: rgba(13, 17, 23, 0.95); border: 1px solid #00ffcc; padding: 12px; border-radius: 8px; margin-top: 10px;">
+        <div style="font-size: 12px; color: #8b949e;">Bróker: <b style="color: #00ffcc;">{broker_seleccionado.split(' - ')[0]}</b></div>
+        <div style="font-size: 12px; color: #8b949e; margin-top: 3px;">💵 Riesgo Monetario: <b style="color: #ff3333;">${dinero_riesgo:.2f}</b></div>
+        <div style="font-size: 14px; color: #00ffcc; margin-top: 5px; font-weight: bold;">📊 Lote Sugerido: {lote_sugerido:.2f} Lotes</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
     st.markdown("### 🕒 Historial de Escaneos")
     if not st.session_state.historial_scans:
         st.info("No hay análisis previos en esta sesión.")
@@ -177,7 +352,6 @@ st.markdown("<h1 style='text-align: center;'>⚡ MT5-CIRE-SCANER ⚡</h1>", unsa
 st.markdown("<p style='text-align: center; color: #8b949e;'>Sistema autónomo institucional de análisis de price action asistido por IA</p>", unsafe_allow_html=True)
 st.divider()
 
-# Carga segura de la API Key desde los secretos de Streamlit
 try:
     api_key = st.secrets["OPENROUTER_API_KEY"]
 except Exception:
@@ -186,45 +360,92 @@ except Exception:
 
 api_url = "https://openrouter.ai/api/v1/chat/completions"
 
-# Listado completo de símbolos estándar de MT5 + Índices Sintéticos
+# Listado completo y masivo categorizado de todos los símbolos existentes en MetaTrader 5
 simbolos_mt5 = [
-    "XAUUSD (Oro vs Dólar)", "XAGUSD (Plata vs Dólar)", "XPTUSD (Platino vs Dólar)", "XPDUSD (Paladio vs Dólar)", 
-    "XAUEUR (Oro vs Euro)", "EURUSD (Euro / Dólar)", "GBPUSD (Libra / Dólar)", "USDJPY (Dólar / Yen Japonés)", 
-    "AUDUSD (Dólar Australiano / Dólar)", "USDCAD (Dólar / Dólar Canadiense)", "NZDUSD (Dólar Neozelandés / Dólar)", 
-    "USDCHF (Dólar / Franco Suizo)", "EURGBP (Euro / Libra Esterlina)", "EURJPY (Euro / Yen Japonés)", 
-    "GBPJPY (Libra / Yen Japonés)", "AUDJPY (Australiano / Yen Japonés)", "CADJPY (Canadiense / Yen Japonés)", 
-    "CHFJPY (Franco / Yen Japonés)", "EURAUD (Euro / Australiano)", "EURCAD (Euro / Canadiense)", 
-    "EURNZD (Euro / Neozelandés)", "GBPAUD (Libra / Australiano)", "GBPCAD (Libra / Canadiense)", 
-    "GBPNZD (Libra / Neozelandés)", "AUDCAD (Australiano / Canadiense)", "AUDNZD (Australiano / Neozelandés)", 
-    "AUDCHF (Australiano / Franco)", "NZDCAD (Neozelandés / Canadiense)", "NZDCHF (Neozelandés / Franco)", 
-    "NZDJPY (Neozelandés / Yen)", "CADCHF (Canadiense / Franco)", "EURCHF (Euro / Franco Suizo)", 
+    # --- METALES ---
+    "XAUUSD (Oro vs Dólar)", "XAUEUR (Oro vs Euro)", "XAGUSD (Plata vs Dólar)", "XAGEUR (Plata vs Euro)", 
+    "XPTUSD (Platino vs Dólar)", "XPDUSD (Paladio vs Dólar)", "COPPER (Cobre)",
+    
+    # --- FOREX MAJORS ---
+    "EURUSD (Euro / Dólar)", "GBPUSD (Libra / Dólar)", "USDJPY (Dólar / Yen Japonés)", 
+    "AUDUSD (Dólar Australiano / Dólar)", "USDCAD (Dólar / Dólar Canadiense)", 
+    "NZDUSD (Dólar Neozelandés / Dólar)", "USDCHF (Dólar / Franco Suizo)",
+    
+    # --- FOREX CROSSES ---
+    "EURGBP (Euro / Libra Esterlina)", "EURJPY (Euro / Yen Japonés)", "GBPJPY (Libra / Yen Japonés)", 
+    "AUDJPY (Australiano / Yen Japonés)", "CADJPY (Canadiense / Yen Japonés)", "CHFJPY (Franco / Yen Japonés)", 
+    "EURAUD (Euro / Australiano)", "EURCAD (Euro / Canadiense)", "EURNZD (Euro / Neozelandés)", 
+    "EURCHF (Euro / Franco Suizo)", "GBPAUD (Libra / Australiano)", "GBPCAD (Libra / Canadiense)", 
+    "GBPNZD (Libra / Neozelandés)", "GBPCHF (Libra / Franco Suizo)", "AUDCAD (Australiano / Canadiense)", 
+    "AUDNZD (Australiano / Neozelandés)", "AUDCHF (Australiano / Franco)", "NZDCAD (Neozelandés / Canadiense)", 
+    "NZDCHF (Neozelandés / Franco)", "NZDJPY (Neozelandés / Yen)", "CADCHF (Canadiense / Franco)",
+    
+    # --- FOREX EXOTICS ---
     "USDMXN (Dólar / Peso Mexicano)", "USDZAR (Dólar / Rand Sudafricano)", "USDTRY (Dólar / Lira Turca)", 
     "USDBRL (Dólar / Real Brasileño)", "USDSGD (Dólar / Dólar de Singapur)", "USDHKD (Dólar / Dólar de Hong Kong)", 
-    "BTCUSD (Bitcoin / Dólar)", "ETHUSD (Ethereum / Dólar)", "SOLUSD (Solana / Dólar)", "XRPUSD (Ripple / Dólar)", 
-    "BNBUSD (Binance Coin / Dólar)", "ADAUSD (Cardano / Dólar)", "DOGEUSD (Dogecoin / Dólar)", "LTCUSD (Litecoin / Dólar)", 
-    "DOTUSD (Polkadot / Dólar)", "LINKUSD (Chainlink / Dólar)", "US30 (Dow Jones Industrial Average)", 
-    "NAS100 (Nasdaq 100 Technological Index)", "SPX500 (S&P 500 Index)", "DAX40 (Alemania 40 Index)", 
-    "FTSE100 (Reino Unido 100 Index)", "CAC40 (Francia 40 Index)", "JP225 (Nikkei 225 - Japón)", 
-    "HK50 (Hang Seng - Hong Kong)", "AUS200 (Australia 200 Index)", "STOXX50 (Euro Stoxx 50)", 
+    "USDSEK (Dólar / Corona Sueca)", "USDNOK (Dólar / Corona Noruega)", "USDDKK (Dólar / Corona Danesa)", 
+    "USDPLN (Dólar / Zloty Polaco)", "USDHUF (Dólar / Florín Húngaro)", "USDCZK (Dólar / Corona Checa)",
+    
+    # --- ÍNDICES BURSÁTILES GLOBALES ---
+    "US30 (Dow Jones Industrial Average)", "NAS100 (Nasdaq 100 Technological Index)", 
+    "SPX500 (S&P 500 Index)", "GER40 / DAX40 (Alemania 40 Index)", "UK100 / FTSE100 (Reino Unido 100 Index)", 
+    "FRA40 / CAC40 (Francia 40 Index)", "JP225 (Nikkei 225 - Japón)", "HK50 (Hang Seng - Hong Kong)", 
+    "AUS200 (Australia 200 Index)", "STOXX50 (Euro Stoxx 50)", "ESP35 (Ibex 35 - España)", 
+    "ITA40 (FTSE MIB - Italia)", "SMI20 (Swiss Market Index)",
+    
+    # --- CRIPTOMONEDAS ---
+    "BTCUSD (Bitcoin / Dólar)", "ETHUSD (Ethereum / Dólar)", "SOLUSD (Solana / Dólar)", 
+    "XRPUSD (Ripple / Dólar)", "BNBUSD (Binance Coin / Dólar)", "ADAUSD (Cardano / Dólar)", 
+    "DOGEUSD (Dogecoin / Dólar)", "LTCUSD (Litecoin / Dólar)", "DOTUSD (Polkadot / Dólar)", 
+    "LINKUSD (Chainlink / Dólar)", "AVAXUSD (Avalanche / Dólar)", "MATICUSD (Polygon / Dólar)", 
+    "SHIBUSD (Shiba Inu / Dólar)", "BCHUSD (Bitcoin Cash / Dólar)",
+    
+    # --- ENERGÍAS Y MATERIAS PRIMAS (COMMODITIES) ---
+    "WTI (Petróleo Crudo WTI)", "BRENT (Petróleo Crudo Brent)", "NATGAS (Gas Natural)", 
+    "SUGAR (Azúcar)", "COFFEE (Café)", "CORN (Maíz)", "WHEAT (Trigo)", "SOYBEAN (Soja)", "COTTON (Algodón)",
+    
+    # --- ÍNDICES SINTÉTICOS (DERIV / DERIVADOS 24/7) ---
     "Volatility 10 Index (R_10)", "Volatility 25 Index (R_25)", "Volatility 50 Index (R_50)", 
     "Volatility 75 Index (R_75)", "Volatility 100 Index (R_100)", "Volatility 10 (1s) Index (1HZ10V)", 
     "Volatility 25 (1s) Index (1HZ25V)", "Volatility 50 (1s) Index (1HZ50V)", "Volatility 75 (1s) Index (1HZ75V)", 
     "Volatility 100 (1s) Index (1HZ100V)", "Boom 300 Index (BOOM300)", "Boom 500 Index (BOOM500)", 
     "Boom 1000 Index (BOOM1000)", "Crash 300 Index (CRASH300)", "Crash 500 Index (CRASH500)", 
     "Crash 1000 Index (CRASH1000)", "Jump 10 Index (JD10)", "Jump 25 Index (JD25)", "Jump 50 Index (JD50)", 
-    "Jump 75 Index (JD75)", "Jump 100 Index (JD100)", "Range Break 100 Index (RBG100)", "Step Index (STEP)", 
-    "WTI (Petróleo Crudo WTI)", "BRENT (Petróleo Crudo Brent)", "NATGAS (Gas Natural)", "COPPER (Cobre)", 
-    "SUGAR (Azúcar)", "COFFEE (Café)", "CORN (Maíz)", "WHEAT (Trigo)"
+    "Jump 75 Index (JD75)", "Jump 100 Index (JD100)", "Range Break 100 Index (RBG100)", "Step Index (STEP)"
 ]
 
-# Controles de Activo y Temporalidad
-col1, col2 = st.columns(2)
-with col1:
-    activo_seleccionado = st.selectbox("📊 Símbolo / Activo MT5", simbolos_mt5, index=0)
-    activo = activo_seleccionado.split(" ")[0]
+# Estructura vertical optimizada (Selector arriba, detalles detallados debajo en formato vertical para ahorrar espacio horizontal)
+activo_seleccionado = st.selectbox("📊 Símbolo / Activo MT5", simbolos_mt5, index=0)
+activo = activo_seleccionado.split(" ")[0]
 
-with col2:
-    temporalidad = st.selectbox("⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN"])
+temporalidad = st.selectbox("⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN"])
+
+# --- INFORMACIÓN DE MERCADO DEBAJO DEL NOMBRE (VERTICAL) ---
+info_mercados_db = {
+    "XAUUSD": {"tipo": "Metal Precioso", "spread": "Promedio 12-25 pips", "sesion": "Londres / Nueva York", "apalancamiento": "Hasta 1:500 o 1:2000"},
+    "EURUSD": {"tipo": "Forex Major", "spread": "Promedio 0-8 pips", "sesion": "Londres / Nueva York", "apalancamiento": "Hasta 1:500 o 1:2000"},
+    "GBPUSD": {"tipo": "Forex Major", "spread": "Promedio 5-12 pips", "sesion": "Londres / Nueva York", "apalancamiento": "Hasta 1:500 o 1:2000"},
+    "USDJPY": {"tipo": "Forex Major", "spread": "Promedio 2-10 pips", "sesion": "Tokio / Nueva York", "apalancamiento": "Hasta 1:500 o 1:2000"},
+    "US30": {"tipo": "Índice Bursátil (EE.UU.)", "spread": "Promedio 2-5 puntos", "sesion": "Sesión Americana (NYSE)", "apalancamiento": "Hasta 1:200 o 1:500"},
+    "NAS100": {"tipo": "Índice Tecnológico (EE.UU.)", "spread": "Promedio 1-3 puntos", "sesion": "Sesión Americana (NASDAQ)", "apalancamiento": "Hasta 1:200 o 1:500"},
+    "BTCUSD": {"tipo": "Criptomoneda", "spread": "Variable según Bróker", "sesion": "Mercado 24/7", "apalancamiento": "Hasta 1:50 o 1:100"},
+    "WTI": {"tipo": "Materia Prima (Energía)", "spread": "Promedio 3-6 pips", "sesion": "Global / NYMEX", "apalancamiento": "Hasta 1:100 o 1:200"}
+}
+
+info_actual = info_mercados_db.get(activo, {
+    "tipo": "Instrumento Financiero MT5", 
+    "spread": "Dinámico (Verificar en Terminal)", 
+    "sesion": "Horario Institucional Estándar", 
+    "apalancamiento": "Según regulación del bróker"
+})
+
+st.markdown(f"""
+<div style="background: rgba(13, 17, 23, 0.85); border: 1px dashed #00ffcc; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; line-height: 1.6;">
+    <div>📌 <b>Clase:</b> <span style="color: #00ffcc;">{info_actual['tipo']}</span></div>
+    <div>⚡ <b>Spread:</b> <span style="color: #ffcc00;">{info_actual['spread']}</span></div>
+    <div>🕒 <b>Sesión:</b> <span style="color: #c9d1d9;">{info_actual['sesion']}</span></div>
+</div>
+""", unsafe_allow_html=True)
 
 archivo_imagen = st.file_uploader("📁 Sube la captura de pantalla de tu gráfico MT5 (PNG, JPG)", type=["png", "jpg", "jpeg"])
 
@@ -297,7 +518,6 @@ if archivo_imagen is not None:
 
                     st.success("✨ ¡Análisis completado con éxito!")
                     
-                    # Guardar en Historial de sesión
                     st.session_state.historial_scans.insert(0, {
                         "activo": activo,
                         "temporalidad": temporalidad,
@@ -311,19 +531,15 @@ if archivo_imagen is not None:
         except Exception as e:
             st.error(f"❌ Error crítico en el proceso: {e}")
 
-# Mostrar el resultado actual (o el seleccionado del historial)
 if "resultado_activo" in st.session_state:
     texto_res = st.session_state["resultado_activo"]
     
-    # Comprobación de discrepancia reportada por la IA para mostrar una alerta visual
     if "ADVERTENCIA DE DISCREPANCIA" in texto_res.upper() or "NO COINCIDE" in texto_res.upper():
         st.warning("⚠️ **ALERTA INSTITUCIONAL:** La IA ha detectado una posible discrepancia entre el activo que seleccionaste en el menú y el símbolo impreso en la captura de pantalla. Revisa el reporte detallado más abajo.")
 
-    # Extracción por expresión regular del porcentaje generado por la IA (ej: "85%")
     match_porcentaje = re.search(r'(\d{1,3}\s*%)', texto_res)
     porcentaje_str = match_porcentaje.group(1) if match_porcentaje else "N/D"
 
-    # Detección inteligente de la orden operativa para el botón gigante
     texto_upper = texto_res.upper()
     if "COMPRA" in texto_upper or "BUY" in texto_upper:
         badge_html = f'<div class="btn-accion-gigante badge-compra">🟢 SEÑAL DE COMPRA (BUY) | CONFIANZA: {porcentaje_str}</div>'
@@ -334,37 +550,5 @@ if "resultado_activo" in st.session_state:
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🛰️ SETUP TÁCTICO DE ALTA PRIORIDAD", unsafe_allow_html=True)
-    
-    # Renderizar el botón gigante con el porcentaje incluido
     st.markdown(badge_html, unsafe_allow_html=True)
-    
-    # Mostrar el contenido completo de la IA
     st.markdown(f"<div class='setup-hologram'>{texto_res}</div>", unsafe_allow_html=True)
-
-    # --- CALCULADORA DE GESTIÓN DE RIESGO Y LOTAJE AVANZADA ---
-    with st.expander("🧮 Calculadora de Gestión de Riesgo y Lotaje Profesional"):
-        st.markdown("Calcula el tamaño de lote institucional basándose en la distancia de tu Stop Loss.")
-        
-        col_c1, col_c2, col_c3 = st.columns(3)
-        with col_c1:
-            capital_cuenta = st.number_input("Capital Cuenta ($)", min_value=10.0, value=1000.0, step=50.0)
-        with col_c2:
-            porcentaje_riesgo = st.number_input("Riesgo Máximo (%)", min_value=0.1, max_value=20.0, value=1.0, step=0.1)
-        with col_c3:
-            distancia_sl_pips = st.number_input("Distancia Stop Loss (Pips/Puntos)", min_value=1.0, value=30.0, step=1.0)
-        
-        # Cálculo de dinero a arriesgar
-        dinero_riesgo = capital_cuenta * (porcentaje_riesgo / 100.0)
-        
-        # Estimación de lotaje estándar (Asumiendo 1 lote estándar = $10 por pip para Forex mayor)
-        valor_pip_estandar = 10.0 
-        lote_sugerido = dinero_riesgo / (distancia_sl_pips * valor_pip_estandar)
-
-        st.divider()
-        col_r1, col_r2 = st.columns(2)
-        with col_r1:
-            st.metric(label="💵 Dinero Máximo a Arriesgar", value=f"${dinero_riesgo:.2f}")
-        with col_r2:
-            st.metric(label="📊 Tamaño de Lote Sugerido (MT5)", value=f"{lote_sugerido:.2f} Lotes")
-        
-        st.caption("Nota: El cálculo de lotaje está optimizado para Forex estándar ($10/pip por lote). Si operas índices o criptos, ajusta el volumen acorde al tamaño de contrato de tu bróker en MetaTrader 5.")
