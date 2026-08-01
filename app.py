@@ -20,7 +20,7 @@ st.set_page_config(
 if "historial_scans" not in st.session_state:
     st.session_state.historial_scans = []
 
-# Estilos CSS con Ocultamiento de la Barra Superior, Fondo Personalizado y Gradientes
+# Estilos CSS con Ocultamiento de la Barra Superior, Fondo Personalizado y Alertas
 st.markdown(
     f"""
     <style>
@@ -160,7 +160,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- PANEL LATERAL: HISTORIAL DE ESCANEOS (SELECTOR DE IA OCULTO) ---
+# --- PANEL LATERAL: HISTORIAL DE ESCANEOS ---
 with st.sidebar:
     modelo_seleccionado = "openrouter/auto"
     
@@ -240,24 +240,30 @@ if archivo_imagen is not None:
 
     if st.button("🚀 EJECUTAR ESCANEO NEURONAL"):
         try:
-            with st.spinner("🧠 Analizando geometría de mercado, liquidez y patrones..."):
+            with st.spinner("🧠 Verificando activo en captura y analizando geometría de mercado..."):
                 imagen_base64 = imagen_a_base64(imagen)
 
                 prompt = f"""
                 Eres un trader institucional experto en acción del precio y análisis técnico. 
-                Analiza la siguiente captura de pantalla de un gráfico de MetaTrader 5 correspondiente al activo {activo} en temporalidad {temporalidad}.
+                El usuario ha seleccionado en el sistema el activo '{activo}' con temporalidad '{temporalidad}'.
+                
+                PASO 0 (VERIFICACIÓN CRÍTICA DE ACTIVO):
+                Examina detalladamente la imagen para identificar el símbolo o nombre del activo que realmente se muestra impreso en el gráfico de MetaTrader 5 (en las esquinas superiores o en la pestaña del gráfico). 
+                - Compara ese activo visual con el activo seleccionado por el usuario ('{activo}').
+                - Si hay una discrepancia o no coincide, DEBES empezar tu respuesta con un aviso claro y destacado de advertencia (ej: "⚠️ ¡ADVERTENCIA DE DISCREPANCIA! El activo seleccionado ({activo}) no coincide con el gráfico detectado (NOMBRE_DETECTADO)"). Si coinciden o son equivalentes, indica que la validación es correcta.
 
                 ESTRUCTURA OBLIGATORIA DE RESPUESTA (DEBE SEGUIR ESTE ORDEN EXACTO):
-                1. **Sugerencia de Entrada (Setup Táctico):** (Debe ser LO PRIMERO que aparezca en el texto de respuesta).
+                1. **Validación de Símbolo / Activo:** (Indica si coincide el activo seleccionado con el de la captura).
+                2. **Sugerencia de Entrada (Setup Táctico):** 
                    - **Dirección:** (COMPRA / VENTA / ESPERAR) -> Usa exactamente una de estas palabras clave en mayúsculas.
                    - **Porcentaje de Aceptación / Probabilidad:** (Ej: 85% o el nivel de confianza técnico estimado).
                    - **Precio de Entrada / Zona:** (Nivel aproximado)
                    - **Stop Loss (SL):** (Nivel recomendado)
                    - **Take Profit (TP):** (Nivel objetivo)
-                2. **Tendencia Actual:** (Alcista, Bajista o Rango).
-                3. **Zonas Clave:** Identifica soportes y resistencias relevantes visibles en el gráfico.
-                4. **Patrones / Indicadores:** Menciona si observas patrones de velas o estructura de mercado.
-                5. **Gestión de Riesgo:** Breve advertencia o confirmación a esperar.
+                3. **Tendencia Actual:** (Alcista, Bajista o Rango).
+                4. **Zonas Clave:** Identifica soportes y resistencias relevantes visibles en el gráfico.
+                5. **Patrones / Indicadores:** Menciona si observas patrones de velas o estructura de mercado.
+                6. **Gestión de Riesgo:** Breve advertencia o confirmación a esperar.
 
                 INSTRUCCIÓN DE FORMATO CRÍTICA PARA LOS PRECIOS:
                 - Envuelve cada valor numérico o nivel de precio alcista dentro de etiquetas HTML: <span class="precio-alcista">PRECIO</span>.
@@ -309,6 +315,10 @@ if archivo_imagen is not None:
 if "resultado_activo" in st.session_state:
     texto_res = st.session_state["resultado_activo"]
     
+    # Comprobación de discrepancia reportada por la IA para mostrar una alerta visual
+    if "ADVERTENCIA DE DISCREPANCIA" in texto_res.upper() or "NO COINCIDE" in texto_res.upper():
+        st.warning("⚠️ **ALERTA INSTITUCIONAL:** La IA ha detectado una posible discrepancia entre el activo que seleccionaste en el menú y el símbolo impreso en la captura de pantalla. Revisa el reporte detallado más abajo.")
+
     # Extracción por expresión regular del porcentaje generado por la IA (ej: "85%")
     match_porcentaje = re.search(r'(\d{1,3}\s*%)', texto_res)
     porcentaje_str = match_porcentaje.group(1) if match_porcentaje else "N/D"
@@ -325,7 +335,7 @@ if "resultado_activo" in st.session_state:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🛰️ SETUP TÁCTICO DE ALTA PRIORIDAD", unsafe_allow_html=True)
     
-    # Renderizar el botón gigante con el porcentaje incluido arriba del reporte
+    # Renderizar el botón gigante con el porcentaje incluido
     st.markdown(badge_html, unsafe_allow_html=True)
     
     # Mostrar el contenido completo de la IA
