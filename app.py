@@ -152,30 +152,44 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- PANEL LATERAL: TICKER ESTILO MT5 (MINIMALISTA CON SÍMBOLO, BID, ASK, CAMBIO), GESTIÓN DE RIESGO E HISTORIAL ---
+# --- PANEL LATERAL: TICKER ACTUALIZADO CON TODOS LOS SÍMBOLOS DE LA LISTA ---
 with st.sidebar:
     modelo_seleccionado = "openrouter/auto"
     
     st.markdown("### 📈 Cotizaciones en Vivo")
     
-    # Widget de TradingView optimizado con columnas estilo Observación de Mercado de MT5 (Símbolo, Bid, Ask, Cambio)
+    # Widget de TradingView actualizado con todos los símbolos de la lista principal
     components.html("""
     <div class="tradingview-widget-container">
       <div class="tradingview-widget-container__widget"></div>
       <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js" async>
       {
       "width": "100%",
-      "height": "250",
+      "height": "400",
       "symbolsGroups": [
         {
-          "name": "MT5 Watchlist",
+          "name": "MT5 Watchlist Completa",
           "symbols": [
             { "name": "OANDA:XAUUSD", "displayName": "XAUUSD" },
+            { "name": "OANDA:XAUEUR", "displayName": "XAUEUR" },
+            { "name": "OANDA:XAGUSD", "displayName": "XAGUSD" },
             { "name": "FX:EURUSD", "displayName": "EURUSD" },
-            { "name": "FX:NZDUSD", "displayName": "NZDUSD" },
-            { "name": "FOREXCOM:SPX500", "displayName": "SP500" },
+            { "name": "FX:GBPUSD", "displayName": "GBPUSD" },
             { "name": "FX:USDJPY", "displayName": "USDJPY" },
-            { "name": "BINANCE:BTCUSDT", "displayName": "BTCUSD" }
+            { "name": "FX:AUDUSD", "displayName": "AUDUSD" },
+            { "name": "FX:USDCAD", "displayName": "USDCAD" },
+            { "name": "FX:NZDUSD", "displayName": "NZDUSD" },
+            { "name": "FX:USDCHF", "displayName": "USDCHF" },
+            { "name": "FX:EURGBP", "displayName": "EURGBP" },
+            { "name": "FX:EURJPY", "displayName": "EURJPY" },
+            { "name": "FX:GBPJPY", "displayName": "GBPJPY" },
+            { "name": "OANDA:US30USD", "displayName": "US30" },
+            { "name": "NASDAQ:NDX", "displayName": "NAS100" },
+            { "name": "FOREXCOM:SPX500", "displayName": "SP500" },
+            { "name": "XETR:DAX", "displayName": "GER40" },
+            { "name": "BINANCE:BTCUSDT", "displayName": "BTCUSD" },
+            { "name": "BINANCE:ETHUSDT", "displayName": "ETHUSD" },
+            { "name": "TVC:USOIL", "displayName": "WTI" }
           ]
         }
       ],
@@ -191,7 +205,7 @@ with st.sidebar:
     }
       </script>
     </div>
-    """, height=260)
+    """, height=410)
 
     st.markdown("---")
     st.markdown("### 🧮 Gestión de Riesgo y Lotaje")
