@@ -1,4 +1,5 @@
 import base64
+import re
 from io import BytesIO
 from PIL import Image
 import requests
@@ -19,7 +20,7 @@ st.set_page_config(
 if "historial_scans" not in st.session_state:
     st.session_state.historial_scans = []
 
-# Estilos CSS con Fondo de Imagen Personalizado, Gradientes Futuristas y Trazo de ECG
+# Estilos CSS con Fondo de Imagen Personalizado, Gradientes y Botones de Decisión Gigantes
 st.markdown(
     f"""
     <style>
@@ -104,6 +105,38 @@ st.markdown(
         margin-bottom: 25px;
     }}
 
+    /* Botones de acción gigantes estilo HUD Cyberpunk */
+    .btn-accion-gigante {{
+        text-align: center;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 32px;
+        font-weight: 900;
+        padding: 18px;
+        border-radius: 12px;
+        letter-spacing: 3px;
+        margin-bottom: 20px;
+        box-shadow: 0 0 30px rgba(0,0,0,0.6);
+        text-transform: uppercase;
+    }}
+    .badge-compra {{
+        background: linear-gradient(135deg, #00b09b, #96c93d);
+        color: #030712;
+        border: 2px solid #00ff66;
+        text-shadow: 0 0 10px rgba(255,255,255,0.6);
+    }}
+    .badge-venta {{
+        background: linear-gradient(135deg, #cb2d3e, #ef473a);
+        color: #ffffff;
+        border: 2px solid #ff3333;
+        text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }}
+    .badge-esperar {{
+        background: linear-gradient(135deg, #f7971e, #ffd200);
+        color: #030712;
+        border: 2px solid #ffcc00;
+        text-shadow: 0 0 10px rgba(255,255,255,0.4);
+    }}
+
     /* Clases de color dinámicas para niveles alcistas y bajistas */
     .precio-alcista {{
         color: #00ff66 !important;
@@ -151,11 +184,11 @@ st.markdown("<h1 style='text-align: center;'>⚡ MT5-CIRE-SCANER ⚡</h1>", unsa
 st.markdown("<p style='text-align: center; color: #8b949e;'>Sistema autónomo institucional de análisis de price action asistido por IA</p>", unsafe_allow_html=True)
 st.divider()
 
-# Carga segura de la API Key desde los secretos de Streamlit (Evita bloqueos en GitHub)
+# Carga segura de la API Key desde los secretos de Streamlit
 try:
     api_key = st.secrets["OPENROUTER_API_KEY"]
 except Exception:
-    st.error("⚠️ Falta configurar la 'OPENROUTER_API_KEY' en el archivo secrets.toml o en la configuración de Streamlit Cloud.")
+    st.error("⚠️ Falta configurar la 'OPENROUTER_API_KEY' en el archivo secrets.toml o en los secretos de Streamlit Cloud.")
     st.stop()
 
 api_url = "https://openrouter.ai/api/v1/chat/completions"
@@ -194,7 +227,7 @@ simbolos_mt5 = [
 # Controles de Activo y Temporalidad
 col1, col2 = st.columns(2)
 with col1:
-    activo_seleccionado = st.selectbox("📊 Símbolo / Activo MT5", simbolos_mt5, index=0)
+    activo_seleccionado = st.selectbox("📊 Símbolo / Activo MT5", simbolos_simulados := simbolos_mt5, index=0)
     activo = activo_seleccionado.split(" ")[0]
 
 with col2:
@@ -223,7 +256,7 @@ if archivo_imagen is not None:
 
                 ESTRUCTURA OBLIGATORIA DE RESPUESTA (DEBE SEGUIR ESTE ORDEN EXACTO):
                 1. **Sugerencia de Entrada (Setup Táctico):** (Debe ser LO PRIMERO que aparezca en el texto de respuesta).
-                   - **Dirección:** (COMPRA / VENTA / ESPERAR)
+                   - **Dirección:** (COMPRA / VENTA / ESPERAR) -> Usa exactamente una de estas palabras clave en mayúsculas.
                    - **Precio de Entrada / Zona:** (Nivel aproximado)
                    - **Stop Loss (SL):** (Nivel recomendado)
                    - **Take Profit (TP):** (Nivel objetivo)
@@ -280,19 +313,51 @@ if archivo_imagen is not None:
 
 # Mostrar el resultado actual (o el seleccionado del historial)
 if "resultado_activo" in st.session_state:
+    texto_res = st.session_state["resultado_activo"]
+    
+    # Detección inteligente de la orden operativa para el botón gigante
+    texto_upper = texto_res.upper()
+    if "COMPRA" in texto_upper or "BUY" in texto_upper:
+        badge_html = '<div class="btn-accion-gigante badge-compra">🟢 SEÑAL DE COMPRA (BUY)</div>'
+    elif "VENTA" in texto_upper or "SELL" in texto_upper:
+        badge_html = '<div class="btn-accion-gigante badge-venta">🔴 SEÑAL DE VENTA (SELL)</div>'
+    else:
+        badge_html = '<div class="btn-accion-gigante badge-esperar">🟡 MANTENER / ESPERAR (WAIT)</div>'
+
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🛰️ SETUP TÁCTICO DE ALTA PRIORIDAD", unsafe_allow_html=True)
-    st.markdown(f"<div class='setup-hologram'>{st.session_state['resultado_activo']}</div>", unsafe_allow_html=True)
+    
+    # Renderizar el botón gigante arriba del reporte
+    st.markdown(badge_html, unsafe_allow_html=True)
+    
+    # Mostrar el contenido completo de la IA
+    st.markdown(f"<div class='setup-hologram'>{texto_res}</div>", unsafe_allow_html=True)
 
-    # --- CALCULADORA DE RIESGO Y LOTAJE AUTOMÁTICA ---
-    with st.expander("🧮 Calculadora de Lotaje y Riesgo para MT5"):
-        st.markdown("Calcula el tamaño de lote ideal basado en tu capital y tolerancia al riesgo.")
-        col_c1, col_c2 = st.columns(2)
-        with col_c1:
-            capital_cuenta = st.number_input("Capital de la Cuenta ($)", min_value=10.0, value=1000.0, step=50.0)
-        with col_c2:
-            porcentaje_riesgo = st.number_input("Riesgo Máximo por Operación (%)", min_value=0.1, max_value=10.0, value=1.0, step=0.1)
+    # --- CALCULADORA DE GESTIÓN DE RIESGO Y LOTAJE AVANZADA ---
+    with st.expander("🧮 Calculadora de Gestión de Riesgo y Lotaje Profesional"):
+        st.markdown("Calcula el tamaño de lote institucional basándose en la distancia de tu Stop Loss.")
         
-        dinero_a_riesgo = capital_cuenta * (porcentaje_riesgo / 100.0)
-        st.info(f"💡 Dinero máximo dispuesto a arriesgar: **${dinero_a_riesgo:.2f}**")
-        st.caption("Asegúrate de ajustar los pips o la distancia de tu Stop Loss según el activo operado en MetaTrader 5.")
+        col_c1, col_c2, col_c3 = st.columns(3)
+        with col_c1:
+            capital_cuenta = st.number_input("Capital Cuenta ($)", min_value=10.0, value=1000.0, step=50.0)
+        with col_c2:
+            porcentaje_riesgo = st.number_input("Riesgo Máximo (%)", min_value=0.1, max_value=20.0, value=1.0, step=0.1)
+        with col_c3:
+            distancia_sl_pips = st.number_input("Distancia Stop Loss (Pips/Puntos)", min_value=1.0, value=30.0, step=1.0)
+        
+        # Cálculo de dinero a arriesgar
+        dinero_riesgo = capital_cuenta * (porcentaje_riesgo / 100.0)
+        
+        # Estimación de lotaje estándar (Asumiendo 1 lote estándar = $10 por pip para Forex mayor, ajustable por activo)
+        # Lote = Dinero a arriesgar / (Distancia en pips * Valor del pip por lote estándar)
+        valor_pip_estandar = 10.0 # Valor general para pares mayores con 1 lote estándar
+        lote_sugerido = dinero_riesgo / (distancia_sl_pips * valor_pip_estandar)
+
+        st.divider()
+        col_r1, col_r2 = st.columns(2)
+        with col_r1:
+            st.metric(label="💵 Dinero Máximo a Arriesgar", value=f"${dinero_riesgo:.2f}")
+        with col_r2:
+            st.metric(label="📊 Tamaño de Lote Sugerido (MT5)", value=f"{lote_sugerido:.2f} Lotes")
+        
+        st.caption("Nota: El cálculo de lotaje está optimizado para Forex estándar ($10/pip por lote). Si operas índices o criptos, ajusta el volumen acorde al tamaño de contrato de tu bróker en MetaTrader 5.")
