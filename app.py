@@ -25,12 +25,10 @@ if "historial_scans" not in st.session_state:
 st.markdown(
     f"""
     <style>
-    /* Ocultar la barra superior (Share, GitHub, etc.), el menú principal y el footer de Streamlit */
     header {{visibility: hidden;}}
     #MainMenu {{visibility: hidden;}}
     footer {{visibility: hidden;}}
 
-    /* Fondo personalizado con imagen en la aplicación y rejilla cibernética superpuesta */
     .stApp {{
         background-color: #030712;
         background-image: 
@@ -45,7 +43,6 @@ st.markdown(
         padding-bottom: 140px;
     }}
 
-    /* Contenedor fijo del trazo de electrocardiograma en movimiento al pie de página */
     .ecg-footer-bg {{
         position: fixed;
         bottom: 0;
@@ -66,7 +63,6 @@ st.markdown(
         100% {{ background-position-x: -1200px; }}
     }}
     
-    /* Títulos futuristas con brillo neón */
     h1, h2, h3 {{
         font-family: 'Courier New', Courier, monospace, sans-serif;
         letter-spacing: -0.5px;
@@ -74,7 +70,6 @@ st.markdown(
         text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
     }}
     
-    /* Botón cyberpunk con animación de pulso */
     div.stButton > button {{
         background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
         color: #ffffff;
@@ -92,7 +87,6 @@ st.markdown(
         transform: translateY(-2px);
     }}
     
-    /* Cajas de texto y selectores personalizados con estilo translúcido */
     .stTextInput input, .stSelectbox select, .stNumberInput input {{
         background-color: rgba(13, 17, 23, 0.9) !important;
         color: #00ffcc !important;
@@ -100,7 +94,6 @@ st.markdown(
         border-radius: 6px !important;
     }}
     
-    /* Contenedor holográfico principal para el Setup Táctico Destacado */
     .setup-hologram {{
         background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(0, 30, 40, 0.9) 100%);
         border: 2px solid #00ffcc;
@@ -111,7 +104,6 @@ st.markdown(
         margin-bottom: 25px;
     }}
 
-    /* Botones de acción gigantes estilo HUD Cyberpunk */
     .btn-accion-gigante {{
         text-align: center;
         font-family: 'Courier New', Courier, monospace;
@@ -143,7 +135,6 @@ st.markdown(
         text-shadow: 0 0 10px rgba(255,255,255,0.4);
     }}
 
-    /* Clases de color dinámicas para niveles alcistas y bajistas */
     .precio-alcista {{
         color: #00ff66 !important;
         font-weight: bold;
@@ -161,7 +152,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- PANEL LATERAL: TICKER EN TIEMPO REAL & HISTORIAL DE ESCANEOS ---
+# --- PANEL LATERAL: TICKER, HISTORIAL Y CALCULADORA INSTITUCIONAL ---
 with st.sidebar:
     modelo_seleccionado = "openrouter/auto"
     
@@ -172,7 +163,7 @@ with st.sidebar:
       <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js" async>
       {
       "width": "100%",
-      "height": "350",
+      "height": "320",
       "symbolsGroups": [
         {
           "name": "Forex & Metales",
@@ -198,7 +189,7 @@ with st.sidebar:
     }
       </script>
     </div>
-    """, height=370)
+    """, height=330)
 
     st.markdown("---")
     st.markdown("### 🕒 Historial de Escaneos")
@@ -209,12 +200,47 @@ with st.sidebar:
             if st.button(f"📌 {item['activo']} ({item['temporalidad']})", key=f"hist_{i}"):
                 st.session_state["resultado_activo"] = item["resultado"]
 
+    st.markdown("---")
+    st.markdown("### 🧮 Calculadora de Lotaje")
+    
+    broker_seleccionado = st.selectbox(
+        "🏢 Seleccionar Bróker", 
+        ["Exness (Estándar/Pro)", "IC Markets (Raw/Standard)", "RoboForex (ProCent/ECN)", "XM (Ultra Low)", "Deriv (Deriv MT5)"]
+    )
+    
+    capital_cuenta = st.number_input("Capital Cuenta ($)", min_value=10.0, value=1000.0, step=50.0, key="side_cap")
+    porcentaje_riesgo = st.number_input("Riesgo Máximo (%)", min_value=0.1, max_value=20.0, value=1.0, step=0.1, key="side_riesgo")
+    distancia_sl_pips = st.number_input("Distancia SL (Pips/Puntos)", min_value=1.0, value=30.0, step=1.0, key="side_sl")
+    
+    dinero_riesgo = capital_cuenta * (porcentaje_riesgo / 100.0)
+    
+    # Asignación de valor de pip según bróker y tipo de activo genérico
+    if "Exness" in broker_seleccionado:
+        valor_pip_estandar = 10.0
+    elif "IC Markets" in broker_seleccionado:
+        valor_pip_estandar = 10.0
+    elif "RoboForex" in broker_seleccionado:
+        valor_pip_estandar = 10.0
+    elif "XM" in broker_seleccionado:
+        valor_pip_estandar = 10.0
+    else:
+        valor_pip_estandar = 1.0 # Sintéticos / Deriv
+        
+    lote_sugerido = dinero_riesgo / (distancia_sl_pips * valor_pip_estandar)
+
+    st.markdown(f"""
+    <div style="background: rgba(13, 17, 23, 0.95); border: 1px solid #00ffcc; padding: 12px; border-radius: 8px; margin-top: 10px;">
+        <div style="font-size: 13px; color: #8b949e;">Bróker: <b style="color: #00ffcc;">{broker_seleccionado}</b></div>
+        <div style="font-size: 13px; color: #8b949e; margin-top: 4px;">💵 Riesgo: <b style="color: #ff3333;">${dinero_riesgo:.2f}</b></div>
+        <div style="font-size: 14px; color: #00ffcc; margin-top: 6px; font-weight: bold;">📊 Lote: {lote_sugerido:.2f} Lotes</div>
+    </div>
+    """, unsafe_allow_html=True)
+
 # Encabezado principal
 st.markdown("<h1 style='text-align: center;'>⚡ MT5-CIRE-SCANER ⚡</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #8b949e;'>Sistema autónomo institucional de análisis de price action asistido por IA</p>", unsafe_allow_html=True)
 st.divider()
 
-# Carga segura de la API Key desde los secretos de Streamlit
 try:
     api_key = st.secrets["OPENROUTER_API_KEY"]
 except Exception:
@@ -223,7 +249,6 @@ except Exception:
 
 api_url = "https://openrouter.ai/api/v1/chat/completions"
 
-# Listado completo de símbolos estándar de MT5 + Índices Sintéticos
 simbolos_mt5 = [
     "XAUUSD (Oro vs Dólar)", "XAGUSD (Plata vs Dólar)", "XPTUSD (Platino vs Dólar)", "XPDUSD (Paladio vs Dólar)", 
     "XAUEUR (Oro vs Euro)", "EURUSD (Euro / Dólar)", "GBPUSD (Libra / Dólar)", "USDJPY (Dólar / Yen Japonés)", 
@@ -254,7 +279,6 @@ simbolos_mt5 = [
     "SUGAR (Azúcar)", "COFFEE (Café)", "CORN (Maíz)", "WHEAT (Trigo)"
 ]
 
-# Controles de Activo y Temporalidad
 col1, col2 = st.columns(2)
 with col1:
     activo_seleccionado = st.selectbox("📊 Símbolo / Activo MT5", simbolos_mt5, index=0)
@@ -334,7 +358,6 @@ if archivo_imagen is not None:
 
                     st.success("✨ ¡Análisis completado con éxito!")
                     
-                    # Guardar en Historial de sesión
                     st.session_state.historial_scans.insert(0, {
                         "activo": activo,
                         "temporalidad": temporalidad,
@@ -348,19 +371,15 @@ if archivo_imagen is not None:
         except Exception as e:
             st.error(f"❌ Error crítico en el proceso: {e}")
 
-# Mostrar el resultado actual (o el seleccionado del historial)
 if "resultado_activo" in st.session_state:
     texto_res = st.session_state["resultado_activo"]
     
-    # Comprobación de discrepancia reportada por la IA para mostrar una alerta visual
     if "ADVERTENCIA DE DISCREPANCIA" in texto_res.upper() or "NO COINCIDE" in texto_res.upper():
         st.warning("⚠️ **ALERTA INSTITUCIONAL:** La IA ha detectado una posible discrepancia entre el activo que seleccionaste en el menú y el símbolo impreso en la captura de pantalla. Revisa el reporte detallado más abajo.")
 
-    # Extracción por expresión regular del porcentaje generado por la IA (ej: "85%")
     match_porcentaje = re.search(r'(\d{1,3}\s*%)', texto_res)
     porcentaje_str = match_porcentaje.group(1) if match_porcentaje else "N/D"
 
-    # Detección inteligente de la orden operativa para el botón gigante
     texto_upper = texto_res.upper()
     if "COMPRA" in texto_upper or "BUY" in texto_upper:
         badge_html = f'<div class="btn-accion-gigante badge-compra">🟢 SEÑAL DE COMPRA (BUY) | CONFIANZA: {porcentaje_str}</div>'
@@ -371,37 +390,5 @@ if "resultado_activo" in st.session_state:
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🛰️ SETUP TÁCTICO DE ALTA PRIORIDAD", unsafe_allow_html=True)
-    
-    # Renderizar el botón gigante con el porcentaje incluido
     st.markdown(badge_html, unsafe_allow_html=True)
-    
-    # Mostrar el contenido completo de la IA
     st.markdown(f"<div class='setup-hologram'>{texto_res}</div>", unsafe_allow_html=True)
-
-    # --- CALCULADORA DE GESTIÓN DE RIESGO Y LOTAJE AVANZADA ---
-    with st.expander("🧮 Calculadora de Gestión de Riesgo y Lotaje Profesional"):
-        st.markdown("Calcula el tamaño de lote institucional basándose en la distancia de tu Stop Loss.")
-        
-        col_c1, col_c2, col_c3 = st.columns(3)
-        with col_c1:
-            capital_cuenta = st.number_input("Capital Cuenta ($)", min_value=10.0, value=1000.0, step=50.0)
-        with col_c2:
-            porcentaje_riesgo = st.number_input("Riesgo Máximo (%)", min_value=0.1, max_value=20.0, value=1.0, step=0.1)
-        with col_c3:
-            distancia_sl_pips = st.number_input("Distancia Stop Loss (Pips/Puntos)", min_value=1.0, value=30.0, step=1.0)
-        
-        # Cálculo de dinero a arriesgar
-        dinero_riesgo = capital_cuenta * (porcentaje_riesgo / 100.0)
-        
-        # Estimación de lotaje estándar (Asumiendo 1 lote estándar = $10 por pip para Forex mayor)
-        valor_pip_estandar = 10.0 
-        lote_sugerido = dinero_riesgo / (distancia_sl_pips * valor_pip_estandar)
-
-        st.divider()
-        col_r1, col_r2 = st.columns(2)
-        with col_r1:
-            st.metric(label="💵 Dinero Máximo a Arriesgar", value=f"${dinero_riesgo:.2f}")
-        with col_r2:
-            st.metric(label="📊 Tamaño de Lote Sugerido (MT5)", value=f"{lote_sugerido:.2f} Lotes")
-        
-        st.caption("Nota: El cálculo de lotaje está optimizado para Forex estándar ($10/pip por lote). Si operas índices o criptos, ajusta el volumen acorde al tamaño de contrato de tu bróker en MetaTrader 5.")
