@@ -21,7 +21,7 @@ st.set_page_config(
 if "historial_scans" not in st.session_state:
     st.session_state.historial_scans = []
 
-# Estilos CSS con Ocultamiento de la Barra Superior, Fondo Personalizado y Alertas
+# Estilos CSS con Ocultamiento de la Barra Superior, Fondo Personalizado y Compactación del Ticker
 st.markdown(
     f"""
     <style>
@@ -152,146 +152,60 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- PANEL LATERAL: TICKER, GESTIÓN DE RIESGO E HISTORIAL ---
+# --- PANEL LATERAL: TICKER ACTUALIZADO CON TODOS LOS SÍMBOLOS DE LA LISTA ---
 with st.sidebar:
     modelo_seleccionado = "openrouter/auto"
     
     st.markdown("### 📈 Cotizaciones en Vivo")
+    
+    # Widget de TradingView actualizado con todos los símbolos de la lista principal
     components.html("""
     <div class="tradingview-widget-container">
       <div class="tradingview-widget-container__widget"></div>
       <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js" async>
       {
       "width": "100%",
-      "height": "520",
+      "height": "400",
       "symbolsGroups": [
         {
-          "name": "Metales",
+          "name": "MT5 Watchlist Completa",
           "symbols": [
-            { "name": "OANDA:XAUUSD", "displayName": "XAUUSD (Oro vs Dólar)" },
-            { "name": "OANDA:XAUEUR", "displayName": "XAUEUR (Oro vs Euro)" },
-            { "name": "OANDA:XAGUSD", "displayName": "XAGUSD (Plata vs Dólar)" },
-            { "name": "OANDA:XAGEUR", "displayName": "XAGEUR (Plata vs Euro)" },
-            { "name": "FX_IDC:XPTUSD", "displayName": "XPTUSD (Platino vs Dólar)" },
-            { "name": "FX_IDC:XPDUSD", "displayName": "XPDUSD (Paladio vs Dólar)" },
-            { "name": "TVC:COPPER", "displayName": "COPPER (Cobre)" }
-          ]
-        },
-        {
-          "name": "Forex Majors",
-          "symbols": [
-            { "name": "FX:EURUSD", "displayName": "EURUSD (Euro / Dólar)" },
-            { "name": "FX:GBPUSD", "displayName": "GBPUSD (Libra / Dólar)" },
-            { "name": "FX:USDJPY", "displayName": "USDJPY (Dólar / Yen Japonés)" },
-            { "name": "FX:AUDUSD", "displayName": "AUDUSD (Dólar Australiano / Dólar)" },
-            { "name": "FX:USDCAD", "displayName": "USDCAD (Dólar / Dólar Canadiense)" },
-            { "name": "FX:NZDUSD", "displayName": "NZDUSD (Dólar Neozelandés / Dólar)" },
-            { "name": "FX:USDCHF", "displayName": "USDCHF (Dólar / Franco Suizo)" }
-          ]
-        },
-        {
-          "name": "Forex Crosses",
-          "symbols": [
-            { "name": "FX:EURGBP", "displayName": "EURGBP (Euro / Libra Esterlina)" },
-            { "name": "FX:EURJPY", "displayName": "EURJPY (Euro / Yen Japonés)" },
-            { "name": "FX:GBPJPY", "displayName": "GBPJPY (Libra / Yen Japonés)" },
-            { "name": "FX:AUDJPY", "displayName": "AUDJPY (Australiano / Yen Japonés)" },
-            { "name": "FX:CADJPY", "displayName": "CADJPY (Canadiense / Yen Japonés)" },
-            { "name": "FX:CHFJPY", "displayName": "CHFJPY (Franco / Yen Japonés)" },
-            { "name": "FX:EURAUD", "displayName": "EURAUD (Euro / Australiano)" },
-            { "name": "FX:EURCAD", "displayName": "EURCAD (Euro / Canadiense)" },
-            { "name": "FX:EURNZD", "displayName": "EURNZD (Euro / Neozelandés)" },
-            { "name": "FX:EURCHF", "displayName": "EURCHF (Euro / Franco Suizo)" },
-            { "name": "FX:GBPAUD", "displayName": "GBPAUD (Libra / Australiano)" },
-            { "name": "FX:GBPCAD", "displayName": "GBPCAD (Libra / Canadiense)" },
-            { "name": "FX:GBPNZD", "displayName": "GBPNZD (Libra / Neozelandés)" },
-            { "name": "FX:GBPCHF", "displayName": "GBPCHF (Libra / Franco Suizo)" },
-            { "name": "FX:AUDCAD", "displayName": "AUDCAD (Australiano / Canadiense)" },
-            { "name": "FX:AUDNZD", "displayName": "AUDNZD (Australiano / Neozelandés)" },
-            { "name": "FX:AUDCHF", "displayName": "AUDCHF (Australiano / Franco)" },
-            { "name": "FX:NZDCAD", "displayName": "NZDCAD (Neozelandés / Canadiense)" },
-            { "name": "FX:NZDCHF", "displayName": "NZDCHF (Neozelandés / Franco)" },
-            { "name": "FX:NZDJPY", "displayName": "NZDJPY (Neozelandés / Yen)" },
-            { "name": "FX:CADCHF", "displayName": "CADCHF (Canadiense / Franco)" }
-          ]
-        },
-        {
-          "name": "Forex Exotics",
-          "symbols": [
-            { "name": "FX_IDC:USDMXN", "displayName": "USDMXN (Dólar / Peso Mexicano)" },
-            { "name": "FX_IDC:USDZAR", "displayName": "USDZAR (Dólar / Rand Sudafricano)" },
-            { "name": "FX_IDC:USDTRY", "displayName": "USDTRY (Dólar / Lira Turca)" },
-            { "name": "FX_IDC:USDBRL", "displayName": "USDBRL (Dólar / Real Brasileño)" },
-            { "name": "FX_IDC:USDSGD", "displayName": "USDSGD (Dólar / Dólar de Singapur)" },
-            { "name": "FX_IDC:USDHKD", "displayName": "USDHKD (Dólar / Dólar de Hong Kong)" },
-            { "name": "FX_IDC:USDSEK", "displayName": "USDSEK (Dólar / Corona Sueca)" },
-            { "name": "FX_IDC:USDNOK", "displayName": "USDNOK (Dólar / Corona Noruega)" },
-            { "name": "FX_IDC:USDDKK", "displayName": "USDDKK (Dólar / Corona Danesa)" },
-            { "name": "FX_IDC:USDPLN", "displayName": "USDPLN (Dólar / Zloty Polaco)" },
-            { "name": "FX_IDC:USDHUF", "displayName": "USDHUF (Dólar / Florín Húngaro)" },
-            { "name": "FX_IDC:USDCZK", "displayName": "USDCZK (Dólar / Corona Checa)" }
-          ]
-        },
-        {
-          "name": "Índices Bursátiles",
-          "symbols": [
-            { "name": "FOREXCOM:US30", "displayName": "US30 (Dow Jones)" },
-            { "name": "FOREXCOM:NAS100", "displayName": "NAS100 (Nasdaq 100)" },
-            { "name": "FOREXCOM:SPX500", "displayName": "SPX500 (S&P 500)" },
-            { "name": "FOREXCOM:GER40", "displayName": "GER40 / DAX40 (Alemania 40)" },
-            { "name": "FOREXCOM:UK100", "displayName": "UK100 / FTSE100 (Reino Unido 100)" },
-            { "name": "FOREXCOM:FRA40", "displayName": "FRA40 / CAC40 (Francia 40)" },
-            { "name": "FOREXCOM:JP225", "displayName": "JP225 (Nikkei 225 - Japón)" },
-            { "name": "FOREXCOM:HK50", "displayName": "HK50 (Hang Seng - Hong Kong)" },
-            { "name": "FOREXCOM:AUS200", "displayName": "AUS200 (Australia 200)" },
-            { "name": "TVC:EU50", "displayName": "STOXX50 (Euro Stoxx 50)" },
-            { "name": "BME:IBEX", "displayName": "ESP35 (Ibex 35 - España)" },
-            { "name": "FTSEMIB:FTSEMIB", "displayName": "ITA40 (FTSE MIB - Italia)" },
-            { "name": "SIX:SMI", "displayName": "SMI20 (Swiss Market Index)" }
-          ]
-        },
-        {
-          "name": "Criptomonedas",
-          "symbols": [
-            { "name": "BINANCE:BTCUSDT", "displayName": "BTCUSD (Bitcoin / Dólar)" },
-            { "name": "BINANCE:ETHUSDT", "displayName": "ETHUSD (Ethereum / Dólar)" },
-            { "name": "BINANCE:SOLUSDT", "displayName": "SOLUSD (Solana / Dólar)" },
-            { "name": "BINANCE:XRPUSDT", "displayName": "XRPUSD (Ripple / Dólar)" },
-            { "name": "BINANCE:BNBUSDT", "displayName": "BNBUSD (Binance Coin / Dólar)" },
-            { "name": "BINANCE:ADAUSDT", "displayName": "ADAUSD (Cardano / Dólar)" },
-            { "name": "BINANCE:DOGEUSDT", "displayName": "DOGEUSD (Dogecoin / Dólar)" },
-            { "name": "BINANCE:LTCUSDT", "displayName": "LTCUSD (Litecoin / Dólar)" },
-            { "name": "BINANCE:DOTUSDT", "displayName": "DOTUSD (Polkadot / Dólar)" },
-            { "name": "BINANCE:LINKUSDT", "displayName": "LINKUSD (Chainlink / Dólar)" },
-            { "name": "BINANCE:AVAXUSDT", "displayName": "AVAXUSD (Avalanche / Dólar)" },
-            { "name": "BINANCE:MATICUSDT", "displayName": "MATICUSD (Polygon / Dólar)" },
-            { "name": "BINANCE:SHIBUSDT", "displayName": "SHIBUSD (Shiba Inu / Dólar)" },
-            { "name": "BINANCE:BCHUSDT", "displayName": "BCHUSD (Bitcoin Cash / Dólar)" }
-          ]
-        },
-        {
-          "name": "Commodities & Energías",
-          "symbols": [
-            { "name": "TVC:USOIL", "displayName": "WTI (Petróleo Crudo WTI)" },
-            { "name": "TVC:UKOIL", "displayName": "BRENT (Petróleo Crudo Brent)" },
-            { "name": "NYMEX:NG1!", "displayName": "NATGAS (Gas Natural)" },
-            { "name": "TVC:SUGAR", "displayName": "SUGAR (Azúcar)" },
-            { "name": "TVC:COFFEE", "displayName": "COFFEE (Café)" },
-            { "name": "CBOT:ZC1!", "displayName": "CORN (Maíz)" },
-            { "name": "CBOT:ZW1!", "displayName": "WHEAT (Trigo)" },
-            { "name": "CBOT:ZS1!", "displayName": "SOYBEAN (Soja)" },
-            { "name": "ICEUS:CT1!", "displayName": "COTTON (Algodón)" }
+            { "name": "OANDA:XAUUSD", "displayName": "XAUUSD" },
+            { "name": "OANDA:XAUEUR", "displayName": "XAUEUR" },
+            { "name": "OANDA:XAGUSD", "displayName": "XAGUSD" },
+            { "name": "FX:EURUSD", "displayName": "EURUSD" },
+            { "name": "FX:GBPUSD", "displayName": "GBPUSD" },
+            { "name": "FX:USDJPY", "displayName": "USDJPY" },
+            { "name": "FX:AUDUSD", "displayName": "AUDUSD" },
+            { "name": "FX:USDCAD", "displayName": "USDCAD" },
+            { "name": "FX:NZDUSD", "displayName": "NZDUSD" },
+            { "name": "FX:USDCHF", "displayName": "USDCHF" },
+            { "name": "FX:EURGBP", "displayName": "EURGBP" },
+            { "name": "FX:EURJPY", "displayName": "EURJPY" },
+            { "name": "FX:GBPJPY", "displayName": "GBPJPY" },
+            { "name": "OANDA:US30USD", "displayName": "US30" },
+            { "name": "NASDAQ:NDX", "displayName": "NAS100" },
+            { "name": "FOREXCOM:SPX500", "displayName": "SP500" },
+            { "name": "XETR:DAX", "displayName": "GER40" },
+            { "name": "BINANCE:BTCUSDT", "displayName": "BTCUSD" },
+            { "name": "BINANCE:ETHUSDT", "displayName": "ETHUSD" },
+            { "name": "TVC:USOIL", "displayName": "WTI" }
           ]
         }
       ],
-      "showSymbolLogo": true,
+      "columns": [
+        "bid",
+        "ask",
+        "change"
+      ],
+      "showSymbolLogo": false,
       "isTransparent": true,
       "colorTheme": "dark",
       "locale": "es"
     }
       </script>
     </div>
-    """, height=530)
+    """, height=410)
 
     st.markdown("---")
     st.markdown("### 🧮 Gestión de Riesgo y Lotaje")
