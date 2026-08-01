@@ -89,14 +89,10 @@ if not api_key:
       help="Clave secreta segura.",
   )
 
-# Endpoint y modelo fijo en OpenRouter Auto
+# Endpoint y modelo fijo en OpenRouter Auto (Oculto de la interfaz visual)
 api_url = "https://openrouter.ai/api/v1/chat/completions"
 modelo_sugerido = "openrouter/auto"
 
-st.markdown(
-    "🟢 **Núcleo Activo:** `openrouter/auto` (Enrutamiento inteligente de"
-    " visión)"
-)
 st.markdown("<br>", unsafe_allow_html=True)
 
 # Listado completo de símbolos estándar de MT5 + Índices Sintéticos
