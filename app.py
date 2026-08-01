@@ -203,10 +203,11 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 🧮 Gestión de Riesgo y Lotaje")
     
-    # Amplia variedad de brókers con especificación de valor de pip/contrato
+    # Selector ampliado incluyendo a Vantage Markets
     broker_seleccionado = st.selectbox(
         "🏢 Seleccionar Bróker", 
         [
+            "Vantage Markets (Standard / ECN - 1 lote = $10/pip)",
             "Exness (Estándar / Pro - 1 lote = $10/pip)", 
             "IC Markets (Raw / Standard - 1 lote = $10/pip)", 
             "RoboForex (ProCent - 1 lote Cent = $0.10/pip)", 
@@ -225,13 +226,13 @@ with st.sidebar:
     
     dinero_riesgo = capital_cuenta * (porcentaje_riesgo / 100.0)
     
-    # Asignación del valor de pip según las especificaciones reales del bróker seleccionado
+    # Asignación del valor de pip según el bróker seleccionado
     if "ProCent" in broker_seleccionado or "Cent" in broker_seleccionado:
-        valor_pip_por_lote = 0.10  # Cuentas Cent (el valor del pip se reduce x100)
+        valor_pip_por_lote = 0.10  # Cuentas Cent
     elif "Deriv" in broker_seleccionado:
-        valor_pip_por_lote = 1.0   # Índices sintéticos por defecto
+        valor_pip_por_lote = 1.0   # Índices sintéticos
     else:
-        valor_pip_por_lote = 10.0  # Cuentas Estándar de Forex Mayor (EURUSD, GBPUSD, etc.)
+        valor_pip_por_lote = 10.0  # Cuentas Estándar (incluye Vantage, Exness, IC Markets, etc.)
         
     # Cálculo seguro de lotaje evitando división por cero
     if distancia_sl_pips > 0:
