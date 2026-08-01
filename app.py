@@ -9,20 +9,49 @@ st.set_page_config(
     page_title="MT5-CIRE-SCANER", page_icon="⚡", layout="centered"
 )
 
-# Estilos CSS con Fondo Futurista Avanzado (Efecto Cyberpunk / Grid Neón Holográfico)
+# Estilos CSS con Fondo Futurista Avanzado y Trazo de Electrocardiograma (ECG) en Movimiento
 st.markdown(
     """
     <style>
-    /* Fondo futurista con rejilla cibernética y gradientes de profundidad */
+    /* Fondo futurista con rejilla cibernética y animación de ECG */
     .stApp {
         background-color: #030712;
         background-image: 
-            radial-gradient(circle at 50% 20%, rgba(0, 255, 204, 0.08) 0%, transparent 50%),
-            radial-gradient(circle at 80% 80%, rgba(0, 180, 216, 0.05) 0%, transparent 40%),
-            linear-gradient(to right, rgba(31, 111, 235, 0.03) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(31, 111, 235, 0.03) 1px, transparent 1px);
-        background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+            linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px),
+            radial-gradient(circle at 50% 20%, rgba(0, 255, 204, 0.08) 0%, transparent 50%);
+        background-size: 40px 40px, 40px 40px, 100% 100%;
         color: #c9d1d9;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Contenedor del trazo de electrocardiograma animado de fondo */
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: 50%;
+        left: 0;
+        width: 200%;
+        height: 120px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,60 L350,60 L370,20 L390,100 L410,10 L430,90 L450,60 L1200,60' fill='none' stroke='%2300ffcc' stroke-width='2' stroke-opacity='0.25'/%3E%3C/svg%3E");
+        background-repeat: repeat-x;
+        background-size: 1200px 120px;
+        transform: translateY(-50%);
+        animation: ecg-move 6s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    @keyframes ecg-move {
+        0% { transform: translate(0, -50%); }
+        100% { transform: translate(-1200px, -50%); }
+    }
+
+    /* Asegurar que el contenido esté por encima del fondo animado */
+    .main > div {
+        position: relative;
+        z-index: 1;
     }
     
     /* Títulos futuristas con brillo neón */
