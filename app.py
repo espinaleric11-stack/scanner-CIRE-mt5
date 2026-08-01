@@ -321,16 +321,13 @@ simbolos_mt5 = [
     "Jump 75 Index (JD75)", "Jump 100 Index (JD100)", "Range Break 100 Index (RBG100)", "Step Index (STEP)"
 ]
 
-# Estructura organizada debajo del selector con información detallada para cada activo seleccionado
-col1, col2 = st.columns(2)
-with col1:
-    activo_seleccionado = st.selectbox("📊 Símbolo / Activo MT5", simbolos_mt5, index=0)
-    activo = activo_seleccionado.split(" ")[0]
+# Estructura vertical optimizada (Selector arriba, detalles detallados debajo en formato vertical para ahorrar espacio horizontal)
+activo_seleccionado = st.selectbox("📊 Símbolo / Activo MT5", simbolos_mt5, index=0)
+activo = activo_seleccionado.split(" ")[0]
 
-with col2:
-    temporalidad = st.selectbox("⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN"])
+temporalidad = st.selectbox("⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN"])
 
-# --- INFORMACIÓN DE MERCADO DEBAJO DEL SELECTOR ---
+# --- INFORMACIÓN DE MERCADO DEBAJO DEL NOMBRE (VERTICAL) ---
 info_mercados_db = {
     "XAUUSD": {"tipo": "Metal Precioso", "spread": "Promedio 12-25 pips", "sesion": "Londres / Nueva York", "apalancamiento": "Hasta 1:500 o 1:2000"},
     "EURUSD": {"tipo": "Forex Major", "spread": "Promedio 0-8 pips", "sesion": "Londres / Nueva York", "apalancamiento": "Hasta 1:500 o 1:2000"},
@@ -350,7 +347,7 @@ info_actual = info_mercados_db.get(activo, {
 })
 
 st.markdown(f"""
-<div style="background: rgba(13, 17, 23, 0.85); border: 1px dashed #00ffcc; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+<div style="background: rgba(13, 17, 23, 0.85); border: 1px dashed #00ffcc; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; line-height: 1.6;">
     <div>📌 <b>Clase:</b> <span style="color: #00ffcc;">{info_actual['tipo']}</span></div>
     <div>⚡ <b>Spread:</b> <span style="color: #ffcc00;">{info_actual['spread']}</span></div>
     <div>🕒 <b>Sesión:</b> <span style="color: #c9d1d9;">{info_actual['sesion']}</span></div>
