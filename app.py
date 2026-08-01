@@ -226,7 +226,11 @@ with col1:
 with col2:
     temporalidad = st.selectbox("⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN"])
 
-archivo_imagen = st.file_uploader("📁 Sube la captura de pantalla de tu gráfico MT5 (PNG, JPG)", type=["png", "jpg", "jpeg"])
+# Widget de carga compatible con Ctrl+V (Portapapeles directo)
+archivo_imagen = st.file_uploader(
+    "📁 Sube o presiona Ctrl+V para pegar la captura de tu gráfico MT5 (PNG, JPG)", 
+    type=["png", "jpg", "jpeg"]
+)
 
 def imagen_a_base64(img):
     buffered = BytesIO()
