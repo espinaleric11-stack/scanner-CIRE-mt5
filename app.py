@@ -99,7 +99,7 @@ st.markdown(
 )
 st.markdown("<br>", unsafe_allow_html=True)
 
-# Listado completo y masivo con todos los símbolos estándar de MT5 organizados
+# Listado completo de símbolos estándar de MT5 + Índices Sintéticos
 simbolos_mt5 = [
     # --- METALES ---
     "XAUUSD (Oro vs Dólar)",
@@ -165,6 +165,30 @@ simbolos_mt5 = [
     "HK50 (Hang Seng - Hong Kong)",
     "AUS200 (Australia 200 Index)",
     "STOXX50 (Euro Stoxx 50)",
+    # --- ÍNDICES SINTÉTICOS (Volatility, Crash/Boom, Jump, Range Break) ---
+    "Volatility 10 Index (R_10)",
+    "Volatility 25 Index (R_25)",
+    "Volatility 50 Index (R_50)",
+    "Volatility 75 Index (R_75)",
+    "Volatility 100 Index (R_100)",
+    "Volatility 10 (1s) Index (1HZ10V)",
+    "Volatility 25 (1s) Index (1HZ25V)",
+    "Volatility 50 (1s) Index (1HZ50V)",
+    "Volatility 75 (1s) Index (1HZ75V)",
+    "Volatility 100 (1s) Index (1HZ100V)",
+    "Boom 300 Index (BOOM300)",
+    "Boom 500 Index (BOOM500)",
+    "Boom 1000 Index (BOOM1000)",
+    "Crash 300 Index (CRASH300)",
+    "Crash 500 Index (CRASH500)",
+    "Crash 1000 Index (CRASH1000)",
+    "Jump 10 Index (JD10)",
+    "Jump 25 Index (JD25)",
+    "Jump 50 Index (JD50)",
+    "Jump 75 Index (JD75)",
+    "Jump 100 Index (JD100)",
+    "Range Break 100 Index (RBG100)",
+    "Step Index (STEP)",
     # --- ENERGÍAS Y MATERIAS PRIMAS ---
     "WTI (Petróleo Crudo WTI)",
     "BRENT (Petróleo Crudo Brent)",
@@ -182,7 +206,7 @@ with col1:
   activo_seleccionado = st.selectbox(
       "📊 Símbolo / Activo MT5", simbolos_mt5, index=0
   )
-  # Extraer únicamente el ticker base (ej: "XAUUSD")
+  # Extraer únicamente el ticker base (primera palabra o código entre paréntesis si aplica)
   activo = activo_seleccionado.split(" ")[0]
 
 with col2:
