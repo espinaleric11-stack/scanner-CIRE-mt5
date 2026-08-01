@@ -20,10 +20,15 @@ st.set_page_config(
 if "historial_scans" not in st.session_state:
     st.session_state.historial_scans = []
 
-# Estilos CSS con Fondo de Imagen Personalizado, Gradientes y Botones de Decisión Gigantes
+# Estilos CSS con Ocultamiento de la Barra Superior, Fondo Personalizado y Gradientes
 st.markdown(
     f"""
     <style>
+    /* Ocultar la barra superior (Share, GitHub, etc.), el menú principal y el footer de Streamlit */
+    header {{visibility: hidden;}}
+    #MainMenu {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
+
     /* Fondo personalizado con imagen en la aplicación y rejilla cibernética superpuesta */
     .stApp {{
         background-color: #030712;
@@ -109,7 +114,7 @@ st.markdown(
     .btn-accion-gigante {{
         text-align: center;
         font-family: 'Courier New', Courier, monospace;
-        font-size: 28px;
+        font-size: 26px;
         font-weight: 900;
         padding: 18px;
         border-radius: 12px;
