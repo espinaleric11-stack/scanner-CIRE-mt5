@@ -6,60 +6,61 @@ import streamlit as st
 
 # Configuración de la página
 st.set_page_config(
-    page_title="MT5 Neural Scanner", page_icon="⚡", layout="centered"
+    page_title="MT5 Neural Scanner Pro", page_icon="⚡", layout="centered"
 )
 
-# Estilos CSS Futuristas / Cyberpunk
+# Estilos CSS Futuristas / Cyberpunk con efectos de neón y terminal financiera
 st.markdown(
     """
     <style>
-    /* Fondo general y tipografía */
+    /* Fondo general y tipografía estilo terminal */
     .stApp {
-        background: radial-gradient(circle at 50% 10%, #0d1117 0%, #010409 100%);
+        background: radial-gradient(circle at 50% 10%, #080c14 0%, #010409 100%);
         color: #c9d1d9;
     }
     
-    /* Títulos futuristas */
+    /* Títulos futuristas con brillo neón */
     h1, h2, h3 {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Courier New', Courier, monospace, sans-serif;
         letter-spacing: -0.5px;
-        color: #58a6ff;
-        text-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
+        color: #00ffcc;
+        text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
     }
     
-    /* Botón futurista */
+    /* Botón cyberpunk con animación de pulso */
     div.stButton > button {
-        background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
-        color: white;
-        border: 1px solid #3fb950;
+        background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+        color: #ffffff;
+        border: 1px solid #00ffcc;
         border-radius: 8px;
-        font-weight: 600;
+        font-weight: 700;
+        letter-spacing: 1px;
         width: 100%;
-        box-shadow: 0 0 15px rgba(46, 160, 67, 0.4);
+        box-shadow: 0 0 15px rgba(0, 180, 216, 0.5);
         transition: all 0.3s ease;
     }
     div.stButton > button:hover {
-        background: linear-gradient(135deg, #2ea043 0%, #3fb950 100%);
-        box-shadow: 0 0 25px rgba(63, 185, 80, 0.8);
+        background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%);
+        box-shadow: 0 0 25px rgba(0, 255, 204, 0.8);
         transform: translateY(-2px);
     }
     
-    /* Cajas de texto y selectores */
+    /* Cajas de texto y selectores personalizados */
     .stTextInput input, .stSelectbox select {
-        background-color: #161b22 !important;
-        color: #58a6ff !important;
-        border: 1px solid #30363d !important;
+        background-color: #0d1117 !important;
+        color: #00ffcc !important;
+        border: 1px solid #1f6feb !important;
         border-radius: 6px !important;
     }
     
-    /* Tarjeta de reporte */
+    /* Contenedor holográfico de reporte táctico */
     .report-container {
-        background: rgba(22, 27, 34, 0.7);
-        border: 1px solid #30363d;
-        border-left: 4px solid #58a6ff;
-        padding: 20px;
+        background: rgba(13, 17, 23, 0.85);
+        border: 1px solid #1f6feb;
+        border-left: 4px solid #00ffcc;
+        padding: 22px;
         border-radius: 8px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 8px 32px rgba(0, 255, 204, 0.15);
     }
     </style>
     """,
@@ -68,7 +69,7 @@ st.markdown(
 
 # Encabezado visual
 st.markdown(
-    "<h1 style='text-align: center;'>⚡ MT5 NEURAL SCANNER ⚡</h1>",
+    "<h1 style='text-align: center;'>⚡ MT5 NEURAL TERMINAL ⚡</h1>",
     unsafe_allow_html=True,
 )
 st.markdown(
@@ -98,58 +99,100 @@ st.markdown(
 )
 st.markdown("<br>", unsafe_allow_html=True)
 
-# Lista completa de activos organizados por categorías
-activos_financieros = [
-    # Metales
-    "XAUUSD (Oro)",
-    "XAGUSD (Plata)",
-    "XPTUSD (Platino)",
-    "XPDUSD (Paladio)",
-    # Forex Majors
+# Listado completo y masivo con todos los símbolos estándar de MT5 organizados
+simbolos_mt5 = [
+    # --- METALES ---
+    "XAUUSD (Oro vs Dólar)",
+    "XAGUSD (Plata vs Dólar)",
+    "XPTUSD (Platino vs Dólar)",
+    "XPDUSD (Paladio vs Dólar)",
+    "XAUEUR (Oro vs Euro)",
+    # --- FOREX: MAJORS ---
     "EURUSD (Euro / Dólar)",
     "GBPUSD (Libra / Dólar)",
-    "USDJPY (Dólar / Yen)",
-    "AUDUSD (Dólar Australiano)",
+    "USDJPY (Dólar / Yen Japonés)",
+    "AUDUSD (Dólar Australiano / Dólar)",
     "USDCAD (Dólar / Dólar Canadiense)",
-    "NZDUSD (Dólar Neozelandés)",
+    "NZDUSD (Dólar Neozelandés / Dólar)",
     "USDCHF (Dólar / Franco Suizo)",
-    # Forex Minors / Crosses
-    "EURGBP (Euro / Libra)",
-    "EURJPY (Euro / Yen)",
-    "GBPJPY (Libra / Yen)",
-    "AUDJPY (Australiano / Yen)",
-    # Criptomonedas
-    "BTCUSD (Bitcoin)",
-    "ETHUSD (Ethereum)",
-    "SOLUSD (Solana)",
-    "XRPUSD (Ripple)",
-    # Índices Bursátiles
-    "US30 (Dow Jones)",
-    "NAS100 (Nasdaq)",
-    "SPX500 (S&P 500)",
-    "DAX40 (Alemania)",
-    # Materias Primas / Energía
-    "WTI (Petróleo Crudo)",
-    "BRENT (Petróleo Brent)",
+    # --- FOREX: CROSSES ---
+    "EURGBP (Euro / Libra Esterlina)",
+    "EURJPY (Euro / Yen Japonés)",
+    "GBPJPY (Libra / Yen Japonés)",
+    "AUDJPY (Australiano / Yen Japonés)",
+    "CADJPY (Canadiense / Yen Japonés)",
+    "CHFJPY (Franco / Yen Japonés)",
+    "EURAUD (Euro / Australiano)",
+    "EURCAD (Euro / Canadiense)",
+    "EURNZD (Euro / Neozelandés)",
+    "GBPAUD (Libra / Australiano)",
+    "GBPCAD (Libra / Canadiense)",
+    "GBPNZD (Libra / Neozelandés)",
+    "AUDCAD (Australiano / Canadiense)",
+    "AUDNZD (Australiano / Neozelandés)",
+    "AUDCHF (Australiano / Franco)",
+    "NZDCAD (Neozelandés / Canadiense)",
+    "NZDCHF (Neozelandés / Franco)",
+    "NZDJPY (Neozelandés / Yen)",
+    "CADCHF (Canadiense / Franco)",
+    "EURCHF (Euro / Franco Suizo)",
+    # --- FOREX: EXOTICS ---
+    "USDMXN (Dólar / Peso Mexicano)",
+    "USDZAR (Dólar / Rand Sudafricano)",
+    "USDTRY (Dólar / Lira Turca)",
+    "USDBRL (Dólar / Real Brasileño)",
+    "USDSGD (Dólar / Dólar de Singapur)",
+    "USDHKD (Dólar / Dólar de Hong Kong)",
+    # --- CRIPTOMONEDAS ---
+    "BTCUSD (Bitcoin / Dólar)",
+    "ETHUSD (Ethereum / Dólar)",
+    "SOLUSD (Solana / Dólar)",
+    "XRPUSD (Ripple / Dólar)",
+    "BNBUSD (Binance Coin / Dólar)",
+    "ADAUSD (Cardano / Dólar)",
+    "DOGEUSD (Dogecoin / Dólar)",
+    "LTCUSD (Litecoin / Dólar)",
+    "DOTUSD (Polkadot / Dólar)",
+    "LINKUSD (Chainlink / Dólar)",
+    # --- ÍNDICES BURSÁTILES ---
+    "US30 (Dow Jones Industrial Average)",
+    "NAS100 (Nasdaq 100 Technological Index)",
+    "SPX500 (S&P 500 Index)",
+    "DAX40 (Alemania 40 Index)",
+    "FTSE100 (Reino Unido 100 Index)",
+    "CAC40 (Francia 40 Index)",
+    "JP225 (Nikkei 225 - Japón)",
+    "HK50 (Hang Seng - Hong Kong)",
+    "AUS200 (Australia 200 Index)",
+    "STOXX50 (Euro Stoxx 50)",
+    # --- ENERGÍAS Y MATERIAS PRIMAS ---
+    "WTI (Petróleo Crudo WTI)",
+    "BRENT (Petróleo Crudo Brent)",
     "NATGAS (Gas Natural)",
+    "COPPER (Cobre)",
+    "SUGAR (Azúcar)",
+    "COFFEE (Café)",
+    "CORN (Maíz)",
+    "WHEAT (Trigo)",
 ]
 
 # Controles de Activo y Temporalidad
 col1, col2 = st.columns(2)
 with col1:
   activo_seleccionado = st.selectbox(
-      "📊 Seleccionar Activo / Par", activos_financieros, index=0
+      "📊 Símbolo / Activo MT5", simbolos_mt5, index=0
   )
-  # Extraer únicamente el ticker base (ej: "XAUUSD" de "XAUUSD (Oro)")
+  # Extraer únicamente el ticker base (ej: "XAUUSD")
   activo = activo_seleccionado.split(" ")[0]
 
 with col2:
   temporalidad = st.selectbox(
-      "⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1"]
+      "⏱️ Temporalidad",
+      ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN"],
   )
 
 archivo_imagen = st.file_uploader(
-    "📁 Sube la captura de pantalla de tu gráfico (PNG, JPG)",
+    "📁 Sube la captura de pantalla de tu gráfico MT5 (PNG, JPG)",
     type=["png", "jpg", "jpeg"],
 )
 
@@ -164,7 +207,7 @@ if archivo_imagen is not None:
   imagen = Image.open(archivo_imagen)
   st.image(
       imagen,
-      caption=f"Monitoreando: {activo} [{temporalidad}]",
+      caption=f"Monitoreando Símbolo: {activo} [{temporalidad}]",
       use_container_width=True,
   )
 
