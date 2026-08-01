@@ -82,7 +82,7 @@ st.markdown(
         transition: all 0.3s ease;
     }}
     div.stButton > button:hover {{
-        background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%);
+        background: linear-gradient(135deg, #0077b6 100%, #00b4d8 100%);
         box-shadow: 0 0 25px rgba(0, 255, 204, 0.8);
         transform: translateY(-2px);
     }}
@@ -152,7 +152,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- PANEL LATERAL: TICKER, HISTORIAL Y CALCULADORA INSTITUCIONAL ---
+# --- PANEL LATERAL: TICKER DE TRADINGVIEW AMPLIADO & HISTORIAL ---
 with st.sidebar:
     modelo_seleccionado = "openrouter/auto"
     
@@ -163,7 +163,7 @@ with st.sidebar:
       <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js" async>
       {
       "width": "100%",
-      "height": "300",
+      "height": "420",
       "symbolsGroups": [
         {
           "name": "Forex & Metales",
@@ -178,7 +178,16 @@ with st.sidebar:
           "name": "Índices",
           "symbols": [
             { "name": "FOREXCOM:US30", "displayName": "US30" },
-            { "name": "FOREXCOM:NAS100", "displayName": "NAS100" }
+            { "name": "FOREXCOM:NAS100", "displayName": "NAS100" },
+            { "name": "FOREXCOM:SPX500", "displayName": "SPX500" },
+            { "name": "FOREXCOM:GER40", "displayName": "DAX40" }
+          ]
+        },
+        {
+          "name": "Criptomonedas",
+          "symbols": [
+            { "name": "BINANCE:BTCUSDT", "displayName": "BTC/USD" },
+            { "name": "BINANCE:ETHUSDT", "displayName": "ETH/USD" }
           ]
         }
       ],
@@ -189,7 +198,7 @@ with st.sidebar:
     }
       </script>
     </div>
-    """, height=310)
+    """, height=430)
 
     st.markdown("---")
     st.markdown("### 🕒 Historial de Escaneos")
@@ -203,7 +212,6 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 🧮 Gestión de Riesgo y Lotaje")
     
-    # Selector ampliado incluyendo a Vantage Markets
     broker_seleccionado = st.selectbox(
         "🏢 Seleccionar Bróker", 
         [
@@ -226,15 +234,13 @@ with st.sidebar:
     
     dinero_riesgo = capital_cuenta * (porcentaje_riesgo / 100.0)
     
-    # Asignación del valor de pip según el bróker seleccionado
     if "ProCent" in broker_seleccionado or "Cent" in broker_seleccionado:
-        valor_pip_por_lote = 0.10  # Cuentas Cent
+        valor_pip_por_lote = 0.10
     elif "Deriv" in broker_seleccionado:
-        valor_pip_por_lote = 1.0   # Índices sintéticos
+        valor_pip_por_lote = 1.0
     else:
-        valor_pip_por_lote = 10.0  # Cuentas Estándar (incluye Vantage, Exness, IC Markets, etc.)
+        valor_pip_por_lote = 10.0
         
-    # Cálculo seguro de lotaje evitando división por cero
     if distancia_sl_pips > 0:
         lote_sugerido = dinero_riesgo / (distancia_sl_pips * valor_pip_por_lote)
     else:
@@ -261,36 +267,61 @@ except Exception:
 
 api_url = "https://openrouter.ai/api/v1/chat/completions"
 
+# Listado completo y masivo categorizado de todos los símbolos existentes en MetaTrader 5
 simbolos_mt5 = [
-    "XAUUSD (Oro vs Dólar)", "XAGUSD (Plata vs Dólar)", "XPTUSD (Platino vs Dólar)", "XPDUSD (Paladio vs Dólar)", 
-    "XAUEUR (Oro vs Euro)", "EURUSD (Euro / Dólar)", "GBPUSD (Libra / Dólar)", "USDJPY (Dólar / Yen Japonés)", 
-    "AUDUSD (Dólar Australiano / Dólar)", "USDCAD (Dólar / Dólar Canadiense)", "NZDUSD (Dólar Neozelandés / Dólar)", 
-    "USDCHF (Dólar / Franco Suizo)", "EURGBP (Euro / Libra Esterlina)", "EURJPY (Euro / Yen Japonés)", 
-    "GBPJPY (Libra / Yen Japonés)", "AUDJPY (Australiano / Yen Japonés)", "CADJPY (Canadiense / Yen Japonés)", 
-    "CHFJPY (Franco / Yen Japonés)", "EURAUD (Euro / Australiano)", "EURCAD (Euro / Canadiense)", 
-    "EURNZD (Euro / Neozelandés)", "GBPAUD (Libra / Australiano)", "GBPCAD (Libra / Canadiense)", 
-    "GBPNZD (Libra / Neozelandés)", "AUDCAD (Australiano / Canadiense)", "AUDNZD (Australiano / Neozelandés)", 
-    "AUDCHF (Australiano / Franco)", "NZDCAD (Neozelandés / Canadiense)", "NZDCHF (Neozelandés / Franco)", 
-    "NZDJPY (Neozelandés / Yen)", "CADCHF (Canadiense / Franco)", "EURCHF (Euro / Franco Suizo)", 
+    # --- METALES ---
+    "XAUUSD (Oro vs Dólar)", "XAUEUR (Oro vs Euro)", "XAGUSD (Plata vs Dólar)", "XAGEUR (Plata vs Euro)", 
+    "XPTUSD (Platino vs Dólar)", "XPDUSD (Paladio vs Dólar)", "COPPER (Cobre)",
+    
+    # --- FOREX MAJORS ---
+    "EURUSD (Euro / Dólar)", "GBPUSD (Libra / Dólar)", "USDJPY (Dólar / Yen Japonés)", 
+    "AUDUSD (Dólar Australiano / Dólar)", "USDCAD (Dólar / Dólar Canadiense)", 
+    "NZDUSD (Dólar Neozelandés / Dólar)", "USDCHF (Dólar / Franco Suizo)",
+    
+    # --- FOREX CROSSES ---
+    "EURGBP (Euro / Libra Esterlina)", "EURJPY (Euro / Yen Japonés)", "GBPJPY (Libra / Yen Japonés)", 
+    "AUDJPY (Australiano / Yen Japonés)", "CADJPY (Canadiense / Yen Japonés)", "CHFJPY (Franco / Yen Japonés)", 
+    "EURAUD (Euro / Australiano)", "EURCAD (Euro / Canadiense)", "EURNZD (Euro / Neozelandés)", 
+    "EURCHF (Euro / Franco Suizo)", "GBPAUD (Libra / Australiano)", "GBPCAD (Libra / Canadiense)", 
+    "GBPNZD (Libra / Neozelandés)", "GBPCHF (Libra / Franco Suizo)", "AUDCAD (Australiano / Canadiense)", 
+    "AUDNZD (Australiano / Neozelandés)", "AUDCHF (Australiano / Franco)", "NZDCAD (Neozelandés / Canadiense)", 
+    "NZDCHF (Neozelandés / Franco)", "NZDJPY (Neozelandés / Yen)", "CADCHF (Canadiense / Franco)",
+    
+    # --- FOREX EXOTICS ---
     "USDMXN (Dólar / Peso Mexicano)", "USDZAR (Dólar / Rand Sudafricano)", "USDTRY (Dólar / Lira Turca)", 
     "USDBRL (Dólar / Real Brasileño)", "USDSGD (Dólar / Dólar de Singapur)", "USDHKD (Dólar / Dólar de Hong Kong)", 
-    "BTCUSD (Bitcoin / Dólar)", "ETHUSD (Ethereum / Dólar)", "SOLUSD (Solana / Dólar)", "XRPUSD (Ripple / Dólar)", 
-    "BNBUSD (Binance Coin / Dólar)", "ADAUSD (Cardano / Dólar)", "DOGEUSD (Dogecoin / Dólar)", "LTCUSD (Litecoin / Dólar)", 
-    "DOTUSD (Polkadot / Dólar)", "LINKUSD (Chainlink / Dólar)", "US30 (Dow Jones Industrial Average)", 
-    "NAS100 (Nasdaq 100 Technological Index)", "SPX500 (S&P 500 Index)", "DAX40 (Alemania 40 Index)", 
-    "FTSE100 (Reino Unido 100 Index)", "CAC40 (Francia 40 Index)", "JP225 (Nikkei 225 - Japón)", 
-    "HK50 (Hang Seng - Hong Kong)", "AUS200 (Australia 200 Index)", "STOXX50 (Euro Stoxx 50)", 
+    "USDSEK (Dólar / Corona Sueca)", "USDNOK (Dólar / Corona Noruega)", "USDDKK (Dólar / Corona Danesa)", 
+    "USDPLN (Dólar / Zloty Polaco)", "USDHUF (Dólar / Florín Húngaro)", "USDCZK (Dólar / Corona Checa)",
+    
+    # --- ÍNDICES BURSÁTILES GLOBALES ---
+    "US30 (Dow Jones Industrial Average)", "NAS100 (Nasdaq 100 Technological Index)", 
+    "SPX500 (S&P 500 Index)", "GER40 / DAX40 (Alemania 40 Index)", "UK100 / FTSE100 (Reino Unido 100 Index)", 
+    "FRA40 / CAC40 (Francia 40 Index)", "JP225 (Nikkei 225 - Japón)", "HK50 (Hang Seng - Hong Kong)", 
+    "AUS200 (Australia 200 Index)", "STOXX50 (Euro Stoxx 50)", "ESP35 (Ibex 35 - España)", 
+    "ITA40 (FTSE MIB - Italia)", "SMI20 (Swiss Market Index)",
+    
+    # --- CRIPTOMONEDAS ---
+    "BTCUSD (Bitcoin / Dólar)", "ETHUSD (Ethereum / Dólar)", "SOLUSD (Solana / Dólar)", 
+    "XRPUSD (Ripple / Dólar)", "BNBUSD (Binance Coin / Dólar)", "ADAUSD (Cardano / Dólar)", 
+    "DOGEUSD (Dogecoin / Dólar)", "LTCUSD (Litecoin / Dólar)", "DOTUSD (Polkadot / Dólar)", 
+    "LINKUSD (Chainlink / Dólar)", "AVAXUSD (Avalanche / Dólar)", "MATICUSD (Polygon / Dólar)", 
+    "SHIBUSD (Shiba Inu / Dólar)", "BCHUSD (Bitcoin Cash / Dólar)",
+    
+    # --- ENERGÍAS Y MATERIAS PRIMAS (COMMODITIES) ---
+    "WTI (Petróleo Crudo WTI)", "BRENT (Petróleo Crudo Brent)", "NATGAS (Gas Natural)", 
+    "SUGAR (Azúcar)", "COFFEE (Café)", "CORN (Maíz)", "WHEAT (Trigo)", "SOYBEAN (Soja)", "COTTON (Algodón)",
+    
+    # --- ÍNDICES SINTÉTICOS (DERIV / DERIVADOS 24/7) ---
     "Volatility 10 Index (R_10)", "Volatility 25 Index (R_25)", "Volatility 50 Index (R_50)", 
     "Volatility 75 Index (R_75)", "Volatility 100 Index (R_100)", "Volatility 10 (1s) Index (1HZ10V)", 
     "Volatility 25 (1s) Index (1HZ25V)", "Volatility 50 (1s) Index (1HZ50V)", "Volatility 75 (1s) Index (1HZ75V)", 
     "Volatility 100 (1s) Index (1HZ100V)", "Boom 300 Index (BOOM300)", "Boom 500 Index (BOOM500)", 
     "Boom 1000 Index (BOOM1000)", "Crash 300 Index (CRASH300)", "Crash 500 Index (CRASH500)", 
     "Crash 1000 Index (CRASH1000)", "Jump 10 Index (JD10)", "Jump 25 Index (JD25)", "Jump 50 Index (JD50)", 
-    "Jump 75 Index (JD75)", "Jump 100 Index (JD100)", "Range Break 100 Index (RBG100)", "Step Index (STEP)", 
-    "WTI (Petróleo Crudo WTI)", "BRENT (Petróleo Crudo Brent)", "NATGAS (Gas Natural)", "COPPER (Cobre)", 
-    "SUGAR (Azúcar)", "COFFEE (Café)", "CORN (Maíz)", "WHEAT (Trigo)"
+    "Jump 75 Index (JD75)", "Jump 100 Index (JD100)", "Range Break 100 Index (RBG100)", "Step Index (STEP)"
 ]
 
+# Estructura organizada debajo del selector con información detallada para cada activo seleccionado
 col1, col2 = st.columns(2)
 with col1:
     activo_seleccionado = st.selectbox("📊 Símbolo / Activo MT5", simbolos_mt5, index=0)
@@ -298,6 +329,35 @@ with col1:
 
 with col2:
     temporalidad = st.selectbox("⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN"])
+
+# --- INFORMACIÓN DE MERCADO DEBAJO DEL SELECTOR ---
+# Base de datos local detallada para los activos principales y generales de MT5
+info_mercados_db = {
+    "XAUUSD": {"tipo": "Metal Precioso", "spread": "Promedio 12-25 pips", "sesion": "Londres / Nueva York", "apalancamiento": "Hasta 1:500 o 1:2000"},
+    "EURUSD": {"tipo": "Forex Major", "spread": "Promedio 0-8 pips", "sesion": "Londres / Nueva York", "apalancamiento": "Hasta 1:500 o 1:2000"},
+    "GBPUSD": {"tipo": "Forex Major", "spread": "Promedio 5-12 pips", "sesion": "Londres / Nueva York", "apalancamiento": "Hasta 1:500 o 1:2000"},
+    "USDJPY": {"tipo": "Forex Major", "spread": "Promedio 2-10 pips", "sesion": "Tokio / Nueva York", "apalancamiento": "Hasta 1:500 o 1:2000"},
+    "US30": {"tipo": "Índice Bursátil (EE.UU.)", "spread": "Promedio 2-5 puntos", "sesion": "Sesión Americana (NYSE)", "apalancamiento": "Hasta 1:200 o 1:500"},
+    "NAS100": {"tipo": "Índice Tecnológico (EE.UU.)", "spread": "Promedio 1-3 puntos", "sesion": "Sesión Americana (NASDAQ)", "apalancamiento": "Hasta 1:200 o 1:500"},
+    "BTCUSD": {"tipo": "Criptomoneda", "spread": "Variable según Bróker", "sesion": "Mercado 24/7", "apalancamiento": "Hasta 1:50 o 1:100"},
+    "WTI": {"tipo": "Materia Prima (Energía)", "spread": "Promedio 3-6 pips", "sesion": "Global / NYMEX", "apalancamiento": "Hasta 1:100 o 1:200"}
+}
+
+# Obtener información específica o por defecto según el activo elegido
+info_actual = info_mercados_db.get(activo, {
+    "tipo": "Instrumento Financiero MT5", 
+    "spread": "Dinámico (Verificar en Terminal)", 
+    "sesion": "Horario Institucional Estándar", 
+    "apalancamiento": "Según regulación del bróker"
+})
+
+st.markdown(f"""
+<div style="background: rgba(13, 17, 23, 0.85); border: 1px dashed #00ffcc; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+    <div>📌 <b>Clase:</b> <span style="color: #00ffcc;">{info_actual['tipo']}</span></div>
+    <div>⚡ <b>Spread:</b> <span style="color: #ffcc00;">{info_actual['spread']}</span></div>
+    <div>🕒 <b>Sesión:</b> <span style="color: #c9d1d9;">{info_actual['sesion']}</span></div>
+</div>
+""", unsafe_allow_html=True)
 
 archivo_imagen = st.file_uploader("📁 Sube la captura de pantalla de tu gráfico MT5 (PNG, JPG)", type=["png", "jpg", "jpeg"])
 
