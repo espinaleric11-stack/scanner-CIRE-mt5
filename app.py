@@ -83,11 +83,22 @@ st.markdown(
         border-radius: 6px !important;
     }
     
-    /* Contenedor holográfico de reporte táctico */
+    /* Contenedor holográfico principal para el Setup Táctico Destacado */
+    .setup-hologram {
+        background: linear-gradient(135deg, rgba(13, 17, 23, 0.95) 0%, rgba(0, 30, 40, 0.9) 100%);
+        border: 2px solid #00ffcc;
+        border-left: 6px solid #00ffcc;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 0 30px rgba(0, 255, 204, 0.25), inset 0 0 15px rgba(0, 255, 204, 0.1);
+        margin-bottom: 25px;
+    }
+
+    /* Contenedor holográfico secundario para el resto del reporte */
     .report-container {
         background: rgba(13, 17, 23, 0.85);
         border: 1px solid #1f6feb;
-        border-left: 4px solid #00ffcc;
+        border-left: 4px solid #1f6feb;
         padding: 22px;
         border-radius: 8px;
         box-shadow: 0 8px 32px rgba(0, 255, 204, 0.15);
@@ -291,15 +302,15 @@ if archivo_imagen is not None:
                     Eres un trader institucional experto en acción del precio y análisis técnico. 
                     Analiza la siguiente captura de pantalla de un gráfico de MetaTrader 5 correspondiente al activo {activo} en temporalidad {temporalidad}.
 
-                    Proporciona un análisis estructurado exactamente con los siguientes puntos:
-                    1. **Tendencia Actual:** (Alcista, Bajista o Rango).
-                    2. **Zonas Clave:** Identifica soportes y resistencias relevantes visibles en el gráfico.
-                    3. **Patrones / Indicadores:** Menciona si observas patrones de velas o estructura de mercado.
-                    4. **Sugerencia de Entrada (Setup):** 
+                    ESTRUCTURA OBLIGATORIA DE RESPUESTA (DEBE SEGUIR ESTE ORDEN EXACTO):
+                    1. **Sugerencia de Entrada (Setup Táctico):** (Debe ser LO PRIMERO que aparezca en el texto de respuesta).
                        - **Dirección:** (COMPRA / VENTA / ESPERAR)
                        - **Precio de Entrada / Zona:** (Nivel aproximado)
                        - **Stop Loss (SL):** (Nivel recomendado)
                        - **Take Profit (TP):** (Nivel objetivo)
+                    2. **Tendencia Actual:** (Alcista, Bajista o Rango).
+                    3. **Zonas Clave:** Identifica soportes y resistencias relevantes visibles en el gráfico.
+                    4. **Patrones / Indicadores:** Menciona si observas patrones de velas o estructura de mercado.
                     5. **Gestión de Riesgo:** Breve advertencia o confirmación a esperar.
 
                     INSTRUCCIÓN DE FORMATO CRÍCITA PARA LOS PRECIOS:
@@ -342,12 +353,17 @@ if archivo_imagen is not None:
             ]
 
             st.success("✨ ¡Análisis completado con éxito!")
-            st.markdown("### 📊 Reporte Táctico Institucional")
 
+            # Dividimos la respuesta para resaltar la Sugerencia de Entrada en un contenedor futurista holográfico
             st.markdown(
-                f"<div class='report-container'>{texto_respuesta}</div>",
+                "### 🛰️ SETUP TÁCTICO DE ALTA PRIORIDAD",
                 unsafe_allow_html=True,
             )
+            st.markdown(
+                f"<div class='setup-hologram'>{texto_respuesta}</div>",
+                unsafe_allow_html=True,
+            )
+
           else:
             st.error(
                 f"❌ Error en la conexión de red ({response.status_code}):"
