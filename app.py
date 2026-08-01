@@ -4,6 +4,7 @@ from io import BytesIO
 from PIL import Image
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 
 # URL de la imagen para el fondo y la pestaña
 IMAGEN_URL_FONDO_ICONO = "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=1920&auto=format&fit=crop"
@@ -160,10 +161,46 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- PANEL LATERAL: HISTORIAL DE ESCANEOS ---
+# --- PANEL LATERAL: TICKER EN TIEMPO REAL & HISTORIAL DE ESCANEOS ---
 with st.sidebar:
     modelo_seleccionado = "openrouter/auto"
     
+    st.markdown("### 📈 Cotizaciones en Vivo")
+    components.html("""
+    <div class="tradingview-widget-container">
+      <div class="tradingview-widget-container__widget"></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-quotes.js" async>
+      {
+      "width": "100%",
+      "height": "350",
+      "symbolsGroups": [
+        {
+          "name": "Forex & Metales",
+          "symbols": [
+            { "name": "OANDA:XAUUSD", "displayName": "Oro (XAUUSD)" },
+            { "name": "FX:EURUSD", "displayName": "EUR/USD" },
+            { "name": "FX:GBPUSD", "displayName": "GBP/USD" },
+            { "name": "FX:USDJPY", "displayName": "USD/JPY" }
+          ]
+        },
+        {
+          "name": "Índices",
+          "symbols": [
+            { "name": "FOREXCOM:US30", "displayName": "US30" },
+            { "name": "FOREXCOM:NAS100", "displayName": "NAS100" }
+          ]
+        }
+      ],
+      "showSymbolLogo": true,
+      "isTransparent": true,
+      "colorTheme": "dark",
+      "locale": "es"
+    }
+      </script>
+    </div>
+    """, height=370)
+
+    st.markdown("---")
     st.markdown("### 🕒 Historial de Escaneos")
     if not st.session_state.historial_scans:
         st.info("No hay análisis previos en esta sesión.")
