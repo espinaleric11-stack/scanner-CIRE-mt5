@@ -4,6 +4,7 @@ from io import BytesIO
 from PIL import Image
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 
 # URL de la imagen para el fondo y la pestaña
 IMAGEN_URL_FONDO_ICONO = "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=1920&auto=format&fit=crop"
@@ -19,6 +20,9 @@ st.set_page_config(
 # Inicializar Historial en session_state
 if "historial_scans" not in st.session_state:
     st.session_state.historial_scans = []
+
+if "imagen_pegada_b64" not in st.session_state:
+    st.session_state.imagen_pegada_b64 = None
 
 # Estilos CSS con Ocultamiento de la Barra Superior, Fondo Personalizado y Alertas
 st.markdown(
@@ -226,19 +230,97 @@ with col1:
 with col2:
     temporalidad = st.selectbox("⏱️ Temporalidad", ["M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN"])
 
-# Widget de carga compatible con Ctrl+V (Portapapeles directo)
-archivo_imagen = st.file_uploader(
-    "📁 Sube o presiona Ctrl+V para pegar la captura de tu gráfico MT5 (PNG, JPG)", 
-    type=["png", "jpg", "jpeg"]
+st.markdown("### 📋 Cuadro de Captura Rápida (Presiona **Ctrl + V** aquí abajo)")
+
+# Componente HTML/JS interactivo para capturar el evento Ctrl+V con portapapeles
+pasted_image_data = components.html(
+    """
+    <div id="paste-box" style="
+        border: 2px dashed #00ffcc; 
+        background: rgba(13, 17, 23, 0.85); 
+        color: #00ffcc; 
+        padding: 30px; 
+        text-align: center; 
+        border-radius: 12px; 
+        font-family: 'Courier New', Courier, monospace;
+        cursor: pointer;
+        box-shadow: 0 0 15px rgba(0, 255, 204, 0.15);
+        transition: all 0.3s ease;
+    ">
+        <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">⚡ Haz clic aquí y presiona <span style="color: #ffffff; background: #1f6feb; padding: 2px 6px; border-radius: 4px;">Ctrl + V</span></div>
+        <div style="font-size: 13px; color: #8b949e;">También puedes hacer clic para pegar la captura directamente desde el portapapeles.</div>
+    </div>
+    <div id="preview-container" style="margin-top: 15px; text-align: center;"></div>
+
+    <script>
+    const box = document.getElementById('paste-box');
+
+    box.addEventListener('click', async () => {
+        try {
+            const clipboardItems = await navigator.clipboard.read();
+            for (const clipboardItem of clipboardItems) {
+                for (const type of clipboardItem.types) {
+                    if (type.startsWith('image/')) {
+                        const blob = await clipboardItem.getType(type);
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const base64data = event.target.result;
+                            document.getElementById('preview-container').innerHTML = '<span style="color: #00ff66; font-family: monospace; font-weight: bold;">✔ ¡Captura cargada desde el portapapeles con éxito!</span>';
+                            // Enviar a Streamlit mediante postMessage
+                            window.parent.postMessage({type: 'streamlit:setComponentValue', value: base64data}, '*');
+                        };
+                        reader.readAsDataURL(blob);
+                        return;
+                    }
+                }
+            }
+        } catch (err) {
+            box.innerText = "⚠️ Tu navegador requiere usar Ctrl+V directamente sobre este cuadro.";
+        }
+    });
+
+    window.addEventListener('paste', async (e) => {
+        e.preventDefault();
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const blob = items[i].getAsFile();
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const base64data = event.target.result;
+                    document.getElementById('preview-container').innerHTML = '<span style="color: #00ff66; font-family: monospace; font-weight: bold;">✔ ¡Captura pegada con éxito vía Ctrl+V!</span>';
+                    window.parent.postMessage({type: 'streamlit:setComponentValue', value: base64data}, '*');
+                };
+                reader.readAsDataURL(blob);
+                break;
+            }
+        }
+    });
+    </script>
+    """,
+    height=140,
 )
+
+# Manejo de la imagen proveniente del cuadro de pegado o de un selector de respaldo
+archivo_imagen = st.file_uploader("📁 O sube la captura de forma tradicional (PNG, JPG)", type=["png", "jpg", "jpeg"])
+
+imagen = None
+if archivo_imagen is not None:
+    imagen = Image.open(archivo_imagen)
+elif "pasted_image_data" in st.session_state and st.session_state.pasted_image_data:
+    try:
+        header, encoded = st.session_state.pasted_image_data.split(",", 1)
+        image_bytes = base64.b64decode(encoded)
+        imagen = Image.open(BytesIO(image_bytes))
+    except Exception:
+        pass
 
 def imagen_a_base64(img):
     buffered = BytesIO()
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
-if archivo_imagen is not None:
-    imagen = Image.open(archivo_imagen)
+if imagen is not None:
     st.image(imagen, caption=f"Monitoreando Símbolo: {activo} [{temporalidad}]", use_container_width=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -319,15 +401,12 @@ if archivo_imagen is not None:
 if "resultado_activo" in st.session_state:
     texto_res = st.session_state["resultado_activo"]
     
-    # Comprobación de discrepancia reportada por la IA para mostrar una alerta visual
     if "ADVERTENCIA DE DISCREPANCIA" in texto_res.upper() or "NO COINCIDE" in texto_res.upper():
         st.warning("⚠️ **ALERTA INSTITUCIONAL:** La IA ha detectado una posible discrepancia entre el activo que seleccionaste en el menú y el símbolo impreso en la captura de pantalla. Revisa el reporte detallado más abajo.")
 
-    # Extracción por expresión regular del porcentaje generado por la IA (ej: "85%")
     match_porcentaje = re.search(r'(\d{1,3}\s*%)', texto_res)
     porcentaje_str = match_porcentaje.group(1) if match_porcentaje else "N/D"
 
-    # Detección inteligente de la orden operativa para el botón gigante
     texto_upper = texto_res.upper()
     if "COMPRA" in texto_upper or "BUY" in texto_upper:
         badge_html = f'<div class="btn-accion-gigante badge-compra">🟢 SEÑAL DE COMPRA (BUY) | CONFIANZA: {porcentaje_str}</div>'
@@ -338,11 +417,7 @@ if "resultado_activo" in st.session_state:
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 🛰️ SETUP TÁCTICO DE ALTA PRIORIDAD", unsafe_allow_html=True)
-    
-    # Renderizar el botón gigante con el porcentaje incluido
     st.markdown(badge_html, unsafe_allow_html=True)
-    
-    # Mostrar el contenido completo de la IA
     st.markdown(f"<div class='setup-hologram'>{texto_res}</div>", unsafe_allow_html=True)
 
     # --- CALCULADORA DE GESTIÓN DE RIESGO Y LOTAJE AVANZADA ---
@@ -357,10 +432,7 @@ if "resultado_activo" in st.session_state:
         with col_c3:
             distancia_sl_pips = st.number_input("Distancia Stop Loss (Pips/Puntos)", min_value=1.0, value=30.0, step=1.0)
         
-        # Cálculo de dinero a arriesgar
         dinero_riesgo = capital_cuenta * (porcentaje_riesgo / 100.0)
-        
-        # Estimación de lotaje estándar (Asumiendo 1 lote estándar = $10 por pip para Forex mayor)
         valor_pip_estandar = 10.0 
         lote_sugerido = dinero_riesgo / (distancia_sl_pips * valor_pip_estandar)
 
