@@ -6,7 +6,7 @@ import streamlit as st
 
 # Configuración de la página
 st.set_page_config(
-    page_title="MT5 Neural Scanner Pro", page_icon="⚡", layout="centered"
+    page_title="MT5-CIRE-SCANER", page_icon="⚡", layout="centered"
 )
 
 # Estilos CSS Futuristas / Cyberpunk con efectos de neón y terminal financiera
@@ -69,7 +69,7 @@ st.markdown(
 
 # Encabezado visual
 st.markdown(
-    "<h1 style='text-align: center;'>⚡ MT5 NEURAL TERMINAL ⚡</h1>",
+    "<h1 style='text-align: center;'>⚡ MT5-CIRE-SCANER ⚡</h1>",
     unsafe_allow_html=True,
 )
 st.markdown(
@@ -165,7 +165,7 @@ simbolos_mt5 = [
     "HK50 (Hang Seng - Hong Kong)",
     "AUS200 (Australia 200 Index)",
     "STOXX50 (Euro Stoxx 50)",
-    # --- ÍNDICES SINTÉTICOS (Volatility, Crash/Boom, Jump, Range Break) ---
+    # --- ÍNDICES SINTÉTICOS ---
     "Volatility 10 Index (R_10)",
     "Volatility 25 Index (R_25)",
     "Volatility 50 Index (R_50)",
@@ -206,7 +206,6 @@ with col1:
   activo_seleccionado = st.selectbox(
       "📊 Símbolo / Activo MT5", simbolos_mt5, index=0
   )
-  # Extraer únicamente el ticker base (primera palabra o código entre paréntesis si aplica)
   activo = activo_seleccionado.split(" ")[0]
 
 with col2:
@@ -267,7 +266,7 @@ if archivo_imagen is not None:
               "Authorization": f"Bearer {api_key}",
               "Content-Type": "application/json",
               "HTTP-Referer": "https://streamlit.io",
-              "X-Title": "MT5 Neural Scanner",
+              "X-Title": "MT5-CIRE-SCANER",
           }
 
           payload = {
@@ -300,7 +299,6 @@ if archivo_imagen is not None:
             st.success("✨ ¡Análisis completado con éxito!")
             st.markdown("### 📊 Reporte Táctico Institucional")
 
-            # Contenedor con diseño futurista para el reporte
             st.markdown(
                 f"<div class='report-container'>{texto_respuesta}</div>",
                 unsafe_allow_html=True,
